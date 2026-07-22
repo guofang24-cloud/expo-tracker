@@ -270,7 +270,7 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
 const TODAY = new Date(2026, 6, 22);
 
 function loadData() {
-  const saved = localStorage.getItem('expo_data9');
+  const saved = localStorage.getItem('expo_data10');
   if (saved) return JSON.parse(saved);
   return {
     projects: [
@@ -328,7 +328,7 @@ function loadData() {
 }
 
 let data = loadData();
-function saveData() { localStorage.setItem('expo_data9', JSON.stringify(data)); }
+function saveData() { localStorage.setItem('expo_data10', JSON.stringify(data)); }
 
 function daysLeft(d) { return Math.ceil((new Date(d) - TODAY) / 86400000); }
 function statusTag(s) {
@@ -561,21 +561,25 @@ ${riskList}
 {"action":"update_todo","id":1,"status":"已完成"}
 \`\`\`
 
-可用操作：
-- update_task: id, status(已完成/进行中/待开始/已延期), pct(数字0-100), note(可选字符串)
-- update_todo: id, status(已完成/待办/已延期)  
+可用操作（你拥有完整的数据修改权限）：
+- update_task: id, status(已完成/进行中/待开始/已延期), pct(0-100), phase, owner, start, end, note, risk
+- delete_task: id (删除指定任务)
+- add_task: project, category, phase, task, start, end, owner, note, risk
+- update_todo: id, status(已完成/待办/已延期)
+- delete_todo: id (删除指定待办)
+- add_todo: project, category, task, priority(紧急/重要/普通), due(YYYY-MM-DD), note
 - update_risk: id, status(已触发/监控中/已受控/已关闭)
-- add_project: name(项目名), category(专区/展桌), deadline(YYYY-MM-DD), team(团队信息), desc(项目描述), tasks(可选数组:[{phase, task, start, end, owner}])
-- add_task: project(项目名), category, phase(阶段), task(任务名), start, end, owner, note, risk
-- add_todo: project, category(专区/展桌), task, priority(紧急/重要/普通), due(YYYY-MM-DD), ref, note
 - add_risk: project, category, level(高/中/低), type, desc, trigger, action, solution
+- add_project: name, category(专区/展桌), deadline(YYYY-MM-DD), team, desc, tasks(可选数组)
+- update_project: name(定位项目), new_name(改名), deadline, team, desc
+- 以上操作可任意组合，一条JSON一个操作
 
 关键规则：
 1. JSON 必须放在 \`\`\`json 和 \`\`\` 之间，每行一条完整JSON
-2. JSON 中不要有注释，不要有换行，严格单行
-3. 即使用户只说"更新某某"，你也必须输出JSON指令
-4. 完成任务后告诉用户更新了什么
-5. 如有即将到期的待办或高风险，主动提醒`;
+2. JSON 严格单行，不要换行、不要注释
+3. 用户说什么你就做什么，直接输出操作指令，无需额外确认
+4. 主动建议：如果发现进度落后、风险累积，提醒用户
+5. 完成任务后简洁告知更新了什么`;
 }
 
 async function testConnection() {
@@ -626,7 +630,33 @@ function parseAndExecCommands(text) {
         const cmd = JSON.parse(trimmed);
         if (cmd.action === 'update_task') {
           const t = data.tasks.find(x => x.id === cmd.id);
-          if (t) { if (cmd.status) t.status = cmd.status; if (cmd.pct !== undefined) t.pct = cmd.pct; if (cmd.note !== undefined) t.note = cmd.note; count++; }
+          if (t) {
+            if (cmd.status) t.status = cmd.status;
+            if (cmd.pct !== undefined) t.pct = cmd.pct;
+            if (cmd.note !== undefined) t.note = cmd.note;
+            if (cmd.phase) t.phase = cmd.phase;
+            if (cmd.owner) t.owner = cmd.owner;
+            if (cmd.start) t.start = cmd.start;
+            if (cmd.end) t.end = cmd.end;
+            if (cmd.risk !== undefined) t.risk = cmd.risk;
+            if (cmd.project && cmd.category) { t.project = cmd.project; t.category = cmd.category; }
+            count++;
+          }
+        } else if (cmd.action === 'delete_task') {
+          const idx = data.tasks.findIndex(x => x.id === cmd.id);
+          if (idx >= 0) { data.tasks.splice(idx, 1); count++; }
+        } else if (cmd.action === 'delete_todo') {
+          const idx = data.todos.findIndex(x => x.id === cmd.id);
+          if (idx >= 0) { data.todos.splice(idx, 1); count++; }
+        } else if (cmd.action === 'update_project') {
+          const p = data.projects.find(x => x.name === cmd.name);
+          if (p) {
+            if (cmd.deadline) p.deadline = cmd.deadline;
+            if (cmd.team) p.team = cmd.team;
+            if (cmd.desc !== undefined) p.desc = cmd.desc;
+            if (cmd.new_name) p.name = cmd.new_name;
+            count++;
+          }
         } else if (cmd.action === 'update_todo') {
           const t = data.todos.find(x => x.id === cmd.id);
           if (t) { if (cmd.status) t.status = cmd.status; count++; }
