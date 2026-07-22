@@ -36,7 +36,9 @@ main{padding:24px;max-width:1300px;margin:0 auto}
 .filters select,.filters input{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;background:var(--card);font-family:inherit}
 
 .cat-section{margin-bottom:28px}
-.cat-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--border)}
+.cat-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:14px 18px;border-radius:12px}
+.cat-header.zone-h{background:linear-gradient(135deg,#faf8ff,#f5f0ff)}
+.cat-header.desk-h{background:linear-gradient(135deg,#f8faff,#eef4ff)}
 .cat-header h2{font-size:17px;font-weight:700}
 .cat-icon{font-size:22px}
 .cat-badge{font-size:11px;padding:2px 10px;border-radius:12px;font-weight:600}
@@ -93,29 +95,32 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
 .empty-cat .icon{font-size:32px;margin-bottom:8px}
 
 /* ── Split layout (排期/待办/风险左右分栏) ── */
-.split-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.split-col{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
-.split-col-header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:2px solid var(--border);font-weight:700;font-size:14px}
-.split-col-header.zone{border-bottom-color:var(--purple)}
-.split-col-header.desk{border-bottom-color:var(--blue)}
-.split-col-header .count{font-size:11px;font-weight:400;color:var(--muted);margin-left:auto}
-.split-col-body{padding:0;overflow-x:auto}
+.split-layout{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.split-col{background:var(--card);border-radius:14px;border:1px solid var(--border);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+.split-col-header{display:flex;align-items:center;gap:10px;padding:14px 18px;font-weight:700;font-size:14px;letter-spacing:-0.2px}
+.split-col-header.zone{background:linear-gradient(135deg,#faf8ff,#f5f0ff);border-bottom:1px solid #e9e0f5}
+.split-col-header.zone span:first-child{font-size:18px}
+.split-col-header.desk{background:linear-gradient(135deg,#f8faff,#eef4ff);border-bottom:1px solid #dae4f5}
+.split-col-header.desk span:first-child{font-size:18px}
+.split-col-header .count{font-size:11px;font-weight:500;color:var(--muted);margin-left:auto;background:rgba(0,0,0,.04);padding:3px 10px;border-radius:10px}
+.split-col-body{padding:6px 0}
 .split-col-body table{width:100%;border-collapse:collapse;font-size:12px}
-.split-col-body th{background:#f8fafc;padding:7px 10px;text-align:left;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)}
-.split-col-body td{padding:7px 10px;border-bottom:1px solid var(--border)}
+.split-col-body th{background:transparent;padding:8px 14px;text-align:left;font-size:11px;color:var(--muted);font-weight:600;border-bottom:1px solid #f1f3f5;text-transform:uppercase;letter-spacing:0.3px}
+.split-col-body td{padding:8px 14px;border-bottom:1px solid #f5f6f8;font-size:12px;color:var(--text)}
 .split-col-body tr:last-child td{border-bottom:none}
-.split-col-body tr:hover td{background:#fafbfc}
-.split-col-empty{padding:30px 16px;text-align:center;color:var(--muted);font-size:13px}
+.split-col-body tr:hover td{background:#fafbfd}
+.split-col-empty{padding:36px 16px;text-align:center;color:#c0c4cc;font-size:13px}
 
 /* ── Project group within split col ── */
-.split-proj{border-bottom:1px solid var(--border)}
-.split-proj:last-child{border-bottom:none}
-.split-proj-top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;font-size:13px;background:#fafbfc}
-.split-proj-top:hover{background:#f1f5f9}
-.split-proj-body{padding:0 0 8px}
+.split-proj{margin:6px 10px;border:1px solid #f1f3f5;border-radius:10px;overflow:hidden;background:#fcfcfd}
+.split-proj+.split-proj{margin-top:10px}
+.split-proj-top{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;cursor:pointer;font-size:13px;background:#fff;transition:background .12s}
+.split-proj-top:hover{background:#f8f9fb}
+.split-proj-body{padding:0}
 .split-proj-body table{width:100%;border-collapse:collapse;font-size:11px}
-.split-proj-body th{background:#f8fafc;padding:6px 10px;text-align:left;font-size:10px;color:var(--muted)}
-.split-proj-body td{padding:6px 10px;border-bottom:1px solid var(--border);font-size:11px}
+.split-proj-body th{background:#f8f9fb;padding:7px 14px;text-align:left;font-size:10px;color:var(--muted);font-weight:600;letter-spacing:0.3px}
+.split-proj-body td{padding:7px 14px;border-bottom:1px solid #f5f6f8;font-size:11px}
+.split-proj-body tr:last-child td{border-bottom:none}
 
 @media(max-width:768px){
   .split-layout{grid-template-columns:1fr}
@@ -250,7 +255,7 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
 const TODAY = new Date(2026, 6, 22);
 
 function loadData() {
-  const saved = localStorage.getItem('expo_data7');
+  const saved = localStorage.getItem('expo_data8');
   if (saved) return JSON.parse(saved);
   return {
     projects: [
@@ -308,7 +313,7 @@ function loadData() {
 }
 
 let data = loadData();
-function saveData() { localStorage.setItem('expo_data7', JSON.stringify(data)); }
+function saveData() { localStorage.setItem('expo_data8', JSON.stringify(data)); }
 
 function daysLeft(d) { return Math.ceil((new Date(d) - TODAY) / 86400000); }
 function statusTag(s) {
@@ -358,14 +363,14 @@ function renderDashboard() {
     <div class="stat"><div class="stat-label">整体进度</div><div class="stat-value">${opct}%</div><div class="progress-bar" style="margin-top:8px"><div class="progress-fill pg-progress" style="width:${opct}%"></div></div></div>
     <div class="stat"><div class="stat-label">高风险</div><div class="stat-value" style="color:var(--red)">${data.risks.filter(r=>r.level==='高'&&r.status!=='已关闭').length}</div><div class="stat-sub">${data.risks.filter(r=>r.status==='监控中').length} 项监控中</div></div>`;
 
-  const cats=[{id:'专区',icon:'🏢',label:'专区项目进度',bc:'cat-zone',em:'暂无专区项目，在排期页添加'},{id:'展桌',icon:'🪑',label:'展桌项目进度',bc:'cat-desk',em:'暂无展桌项目'}];
+  const cats=[{id:'专区',icon:'🏢',label:'专区项目进度',bc:'cat-zone',hc:'zone-h',em:'暂无专区项目，在排期页添加'},{id:'展桌',icon:'🪑',label:'展桌项目进度',bc:'cat-desk',hc:'desk-h',em:'暂无展桌项目'}];
   let h='';
   cats.forEach(cat=>{
     const projs=data.projects.filter(p=>p.category===cat.id);
     const ctasks=data.tasks.filter(t=>t.category===cat.id);
     const ctodos=data.todos.filter(t=>t.category===cat.id);
     const dtodos=ctodos.filter(t=>t.status==='已完成').length;
-    h+=`<div class="cat-section"><div class="cat-header"><span class="cat-icon">${cat.icon}</span><h2>${cat.label}</h2><span class="cat-badge ${cat.bc}">${projs.length} 项目 · ${ctasks.length} 任务 · ${dtodos}/${ctodos.length} 待办</span></div>`;
+    h+=`<div class="cat-section"><div class="cat-header ${cat.hc}"><span class="cat-icon">${cat.icon}</span><h2>${cat.label}</h2><span class="cat-badge ${cat.bc}">${projs.length} 项目 · ${ctasks.length} 任务 · ${dtodos}/${ctodos.length} 待办</span></div>`;
     if(!projs.length){h+=`<div class="empty-cat"><div class="icon">${cat.icon}</div><div>${cat.em}</div></div>`;}
     else{
       projs.forEach(p=>{
