@@ -92,6 +92,25 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
 .empty-cat{text-align:center;padding:40px 20px;color:var(--muted);background:var(--card);border-radius:var(--radius);border:1px dashed var(--border)}
 .empty-cat .icon{font-size:32px;margin-bottom:8px}
 
+/* ── Split layout (排期/待办/风险左右分栏) ── */
+.split-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.split-col{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.split-col-header{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:2px solid var(--border);font-weight:700;font-size:14px}
+.split-col-header.zone{border-bottom-color:var(--purple)}
+.split-col-header.desk{border-bottom-color:var(--blue)}
+.split-col-header .count{font-size:11px;font-weight:400;color:var(--muted);margin-left:auto}
+.split-col-body{padding:0;overflow-x:auto}
+.split-col-body table{width:100%;border-collapse:collapse;font-size:12px}
+.split-col-body th{background:#f8fafc;padding:7px 10px;text-align:left;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)}
+.split-col-body td{padding:7px 10px;border-bottom:1px solid var(--border)}
+.split-col-body tr:last-child td{border-bottom:none}
+.split-col-body tr:hover td{background:#fafbfc}
+.split-col-empty{padding:30px 16px;text-align:center;color:var(--muted);font-size:13px}
+
+@media(max-width:768px){
+  .split-layout{grid-template-columns:1fr}
+}
+
 /* ── Chat Assistant ── */
 .chat-fab{position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:var(--blue);color:#fff;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(37,99,235,.35);z-index:200;transition:all .2s;display:flex;align-items:center;justify-content:center}
 .chat-fab:hover{transform:scale(1.08);box-shadow:0 6px 24px rgba(37,99,235,.45)}
@@ -159,22 +178,13 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
   <div id="categorySections"></div>
 </section>
 <section class="panel" id="panel-schedule">
-  <div class="filters">
-    <select id="catFilter" onchange="renderSchedule()"><option value="all">全部类别</option><option value="专区">🏢 专区项目</option><option value="展桌">🪑 展桌项目</option></select>
-    <select id="projFilter" onchange="renderSchedule()"><option value="all">全部项目</option></select>
-    <select id="phaseFilter" onchange="renderSchedule()"><option value="all">全部阶段</option></select>
-  </div>
-  <div class="table-wrap" id="scheduleTable"></div>
+  <div class="split-layout" id="scheduleLayout"></div>
 </section>
 <section class="panel" id="panel-todos">
-  <div class="filters">
-    <select id="todoCat" onchange="renderTodos()"><option value="all">全部类别</option></select>
-    <select id="todoPriority" onchange="renderTodos()"><option value="all">全部优先级</option><option value="紧急">🔴 紧急</option><option value="重要">🟡 重要</option><option value="普通">🟢 普通</option></select>
-  </div>
-  <div class="table-wrap" id="todoTable"></div>
+  <div class="split-layout" id="todosLayout"></div>
 </section>
 <section class="panel" id="panel-risks">
-  <div class="table-wrap" id="riskTable"></div>
+  <div class="split-layout" id="risksLayout"></div>
 </section>
 </main>
 
@@ -230,7 +240,7 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
 const TODAY = new Date(2026, 6, 22);
 
 function loadData() {
-  const saved = localStorage.getItem('expo_data5');
+  const saved = localStorage.getItem('expo_data6');
   if (saved) return JSON.parse(saved);
   return {
     projects: [
@@ -288,7 +298,7 @@ function loadData() {
 }
 
 let data = loadData();
-function saveData() { localStorage.setItem('expo_data5', JSON.stringify(data)); }
+function saveData() { localStorage.setItem('expo_data6', JSON.stringify(data)); }
 
 function daysLeft(d) { return Math.ceil((new Date(d) - TODAY) / 86400000); }
 function statusTag(s) {
@@ -361,25 +371,39 @@ function renderDashboard() {
   document.getElementById('categorySections').innerHTML=h;
 }
 
+function renderSplitCard(icon, title, cls, items, emptyMsg, renderItem) {
+  let h = `<div class="split-col"><div class="split-col-header ${cls}"><span>${icon}</span> ${title}<span class="count">${items.length} 项</span></div><div class="split-col-body">`;
+  if (!items.length) { h += `<div class="split-col-empty">${emptyMsg}</div>`; }
+  else { h += renderItem(items); }
+  h += `</div></div>`;
+  return h;
+}
+
 function renderSchedule() {
-  const cf=document.getElementById('catFilter')?.value||'all',pf=document.getElementById('projFilter')?.value||'all',phf=document.getElementById('phaseFilter')?.value||'all';
-  const projs=[...new Set(data.tasks.map(t=>t.project))],phases=[...new Set(data.tasks.map(t=>t.phase))];
-  document.getElementById('projFilter').innerHTML='<option value="all">全部项目</option>'+projs.map(p=>`<option value="${p}" ${pf===p?'selected':''}>${p}</option>`).join('');
-  document.getElementById('phaseFilter').innerHTML='<option value="all">全部阶段</option>'+phases.map(p=>`<option value="${p}" ${phf===p?'selected':''}>${p}</option>`).join('');
-  const filtered=data.tasks.filter(t=>(cf==='all'||t.category===cf)&&(pf==='all'||t.project===pf)&&(phf==='all'||t.phase===phf));
-  document.getElementById('scheduleTable').innerHTML=`<table><thead><tr><th>#</th><th>类别</th><th>项目</th><th>阶段</th><th>任务</th><th>开始</th><th>截止</th><th>负责人</th><th>状态</th><th>%</th><th>备注</th><th>风险</th></tr></thead><tbody>${filtered.map(t=>`<tr><td>${t.id}</td><td><span class="cat-badge ${t.category==='专区'?'cat-zone':'cat-desk'}">${t.category==='专区'?'🏢':'🪑'}</span></td><td>${t.project}</td><td>${t.phase}</td><td>${t.task}</td><td>${t.start}</td><td>${t.end}</td><td>${t.owner}</td><td>${statusSelect(t.id,t.status,'task')}</td><td><div class="progress-bar"><div class="progress-fill pg-progress" style="width:${t.pct}%"></div></div><small>${t.pct}%</small></td><td style="font-size:11px;color:var(--muted)">${t.note}</td><td>${riskTag(t.risk)}</td></tr>`).join('')}</tbody></table>`;
+  const zoneTasks = data.tasks.filter(t => t.category === '专区');
+  const deskTasks = data.tasks.filter(t => t.category === '展桌');
+  const renderTbl = (items) => `<table><thead><tr><th>项目</th><th>阶段</th><th>任务</th><th>截止</th><th>负责人</th><th>状态</th><th>%</th><th>风险</th></tr></thead><tbody>${items.map(t => `<tr><td>${t.project}</td><td>${t.phase}</td><td>${t.task}</td><td>${t.end} (${daysLeft(t.end)}天)</td><td>${t.owner}</td><td>${statusSelect(t.id,t.status,'task')}</td><td><div class="progress-bar"><div class="progress-fill pg-progress" style="width:${t.pct}%"></div></div><small>${t.pct}%</small></td><td>${riskTag(t.risk)}</td></tr>`).join('')}</tbody></table>`;
+  document.getElementById('scheduleLayout').innerHTML =
+    renderSplitCard('🏢', '专区项目排期', 'zone', zoneTasks, '暂无专区任务', renderTbl) +
+    renderSplitCard('🪑', '展桌项目排期', 'desk', deskTasks, '暂无展桌任务', renderTbl);
 }
 
 function renderTodos() {
-  const cf=document.getElementById('todoCat')?.value||'all',pf=document.getElementById('todoPriority')?.value||'all';
-  const cats=[...new Set(data.todos.map(t=>t.category))];
-  document.getElementById('todoCat').innerHTML='<option value="all">全部类别</option>'+cats.map(c=>`<option value="${c}" ${cf===c?'selected':''}>${c==='专区'?'🏢 专区':'🪑 展桌'}</option>`).join('');
-  const filtered=data.todos.filter(t=>(cf==='all'||t.category===cf)&&(pf==='all'||t.priority===pf));
-  document.getElementById('todoTable').innerHTML=`<table><thead><tr><th>#</th><th>类别</th><th>项目</th><th>待办</th><th>优先级</th><th>截止</th><th>关联</th><th>状态</th><th>备注</th></tr></thead><tbody>${filtered.map(t=>`<tr><td>${t.id}</td><td><span class="cat-badge ${t.category==='专区'?'cat-zone':'cat-desk'}">${t.category==='专区'?'🏢':'🪑'}</span></td><td>${t.project}</td><td>${t.task}</td><td>${priorityTag(t.priority)}</td><td>${t.due} (${daysLeft(t.due)}天)</td><td style="font-size:11px">${t.ref}</td><td>${statusSelect(t.id,t.status,'todo')}</td><td style="font-size:11px;color:var(--muted)">${t.note}</td></tr>`).join('')}</tbody></table>`;
+  const zoneTodos = data.todos.filter(t => t.category === '专区');
+  const deskTodos = data.todos.filter(t => t.category === '展桌');
+  const renderTbl = (items) => `<table><thead><tr><th>项目</th><th>待办</th><th>优先级</th><th>截止</th><th>状态</th><th>备注</th></tr></thead><tbody>${items.map(t => `<tr><td>${t.project}</td><td>${t.task}</td><td>${priorityTag(t.priority)}</td><td>${t.due} (${daysLeft(t.due)}天)</td><td>${statusSelect(t.id,t.status,'todo')}</td><td style="font-size:11px;color:var(--muted)">${t.note}</td></tr>`).join('')}</tbody></table>`;
+  document.getElementById('todosLayout').innerHTML =
+    renderSplitCard('🏢', '专区待办', 'zone', zoneTodos, '暂无专区待办', renderTbl) +
+    renderSplitCard('🪑', '展桌待办', 'desk', deskTodos, '暂无展桌待办', renderTbl);
 }
 
 function renderRisks() {
-  document.getElementById('riskTable').innerHTML=`<table><thead><tr><th>ID</th><th>项目</th><th>等级</th><th>类别</th><th>描述</th><th>触发条件</th><th>应对</th><th>关键行动</th><th>状态</th></tr></thead><tbody>${data.risks.map(r=>`<tr><td>${r.id}</td><td>${r.project}</td><td>${riskTag(r.level)}</td><td>${r.type}</td><td>${r.desc}</td><td style="font-size:11px">${r.trigger}</td><td style="font-size:11px;white-space:pre-line">${r.solution}</td><td style="font-size:12px;font-weight:600">${r.action}</td><td>${statusSelect(r.id,r.status,'risk')}</td></tr>`).join('')}</tbody></table>`;
+  const zoneRisks = data.risks.filter(r => r.category === '专区');
+  const deskRisks = data.risks.filter(r => r.category === '展桌');
+  const renderTbl = (items) => `<table><thead><tr><th>ID</th><th>项目</th><th>等级</th><th>类别</th><th>描述</th><th>关键行动</th><th>状态</th></tr></thead><tbody>${items.map(r => `<tr><td>${r.id}</td><td>${r.project}</td><td>${riskTag(r.level)}</td><td>${r.type}</td><td>${r.desc}</td><td style="font-size:12px;font-weight:600">${r.action}</td><td>${statusSelect(r.id,r.status,'risk')}</td></tr>`).join('')}</tbody></table>`;
+  document.getElementById('risksLayout').innerHTML =
+    renderSplitCard('🏢', '专区风险', 'zone', zoneRisks, '暂无专区风险', renderTbl) +
+    renderSplitCard('🪑', '展桌风险', 'desk', deskRisks, '暂无展桌风险', renderTbl);
 }
 
 function switchTab(name) {
