@@ -429,13 +429,13 @@ ${riskList}
 当用户要求更新数据时，你必须严格按照以下格式操作。这是强制执行，不可省略：
 
 1. 先给出文字分析和建议
-2. 然后在回复末尾添加一个 ```json 代码块，每行一条JSON指令
+2. 然后在回复末尾添加一个 \`\`\`json 代码块，每行一条JSON指令
 
 格式示例（必须严格遵守）：
-```json
+\`\`\`json
 {"action":"update_task","id":4,"status":"进行中","pct":60}
 {"action":"update_todo","id":1,"status":"已完成"}
-```
+\`\`\`
 
 可用操作：
 - update_task: id, status(已完成/进行中/待开始/已延期), pct(数字0-100), note(可选字符串)
@@ -445,7 +445,7 @@ ${riskList}
 - add_risk: project, category, level(高/中/低), type, desc, trigger, action, solution
 
 关键规则：
-1. JSON 必须放在 ```json 和 ``` 之间，每行一条完整JSON
+1. JSON 必须放在 \`\`\`json 和 \`\`\` 之间，每行一条完整JSON
 2. JSON 中不要有注释，不要有换行，严格单行
 3. 即使用户只说"更新某某"，你也必须输出JSON指令
 4. 完成任务后告诉用户更新了什么
@@ -549,7 +549,9 @@ async function sendMessage() {
     });
     messages.push({role:'user',content:text});
 
-    const resp=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${cfg.key}`},body:JSON.stringify({model:cfg.model,messages,temperature:0.7,max_tokens:1200})});
+    const controller=new AbortController();const tid=setTimeout(()=>controller.abort(),30000);
+    const resp=await fetch(cfg.url,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${cfg.key}`},body:JSON.stringify({model:cfg.model,messages,temperature:0.7,max_tokens:1200}),signal:controller.signal});
+    clearTimeout(tid);
     if(!resp.ok){const err=await resp.json();throw new Error(err.error?.message||`HTTP ${resp.status}`);}
     const result=await resp.json();
     let reply=result.choices[0].message.content;
