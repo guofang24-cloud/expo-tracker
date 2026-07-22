@@ -235,7 +235,7 @@ function loadData() {
   return {
     projects: [
       { id:"p1", name:"日本yodo仙台展桌", category:"展桌", deadline:"2026-07-31", team:"设计:方镱静 / 销售:彭建桥 / 采购:何嘉文 / 供应商:兴俊诚", desc:"1pcs 视频展桌" },
-      { id:"p2", name:"迪拜Emax渠道being专区", category:"专区", deadline:"2026-08-30", team:"销售 / 迪拜施工方", desc:"迪拜当地制作 · 设计已完成" }
+      { id:"p2", name:"迪拜Emax渠道being专区", category:"专区", deadline:"2026-08-30", team:"设计:方镱静 / 销售:阿尔曼 / 施工:迪拜施工方", desc:"迪拜当地制作 · 设计已完成" }
     ],
     tasks: [
       { id:1, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"设计阶段", task:"概念设计及内部审核", start:"2026-07-08", end:"2026-07-14", owner:"方镱静", status:"已完成", pct:100, note:"", risk:"" },
@@ -246,12 +246,12 @@ function loadData() {
       { id:6, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"质检阶段", task:"内部质检", start:"2026-07-28", end:"2026-07-29", owner:"方镱静", status:"待开始", pct:0, note:"", risk:"" },
       { id:7, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"交付阶段", task:"包装及出库准备", start:"2026-07-29", end:"2026-07-30", owner:"何嘉文", status:"待开始", pct:0, note:"", risk:"" },
       { id:8, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"交付阶段", task:"送货入库 🎯 硬性截止", start:"2026-07-31", end:"2026-07-31", owner:"彭建桥", status:"待开始", pct:0, note:"提前预约车辆 + 确认仓库接收人", risk:"中" },
-      { id:9, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"设计阶段", task:"概念设计及内部审核", start:"2026-07-01", end:"2026-07-10", owner:"设计", status:"已完成", pct:100, note:"", risk:"" },
-      { id:10, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"设计阶段", task:"尺寸图纸输出", start:"2026-07-10", end:"2026-07-18", owner:"设计", status:"已完成", pct:100, note:"", risk:"" },
-      { id:11, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"深化阶段", task:"销售联系迪拜施工方反馈深化施工图纸审核", start:"2026-07-18", end:"2026-07-28", owner:"销售", status:"进行中", pct:20, note:"需催促施工方尽快反馈", risk:"中" },
+      { id:9, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"设计阶段", task:"概念设计及内部审核", start:"2026-07-01", end:"2026-07-10", owner:"方镱静", status:"已完成", pct:100, note:"", risk:"" },
+      { id:10, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"设计阶段", task:"尺寸图纸输出", start:"2026-07-10", end:"2026-07-18", owner:"方镱静", status:"已完成", pct:100, note:"", risk:"" },
+      { id:11, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"深化阶段", task:"销售联系迪拜施工方反馈深化施工图纸审核", start:"2026-07-18", end:"2026-07-28", owner:"阿尔曼", status:"进行中", pct:20, note:"需催促施工方尽快反馈", risk:"中" },
       { id:12, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"制作阶段", task:"迪拜当地制作", start:"2026-07-28", end:"2026-08-20", owner:"迪拜施工方", status:"待开始", pct:0, note:"图纸确认后启动", risk:"中" },
-      { id:13, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"质检阶段", task:"内部质检", start:"2026-08-20", end:"2026-08-25", owner:"销售", status:"待开始", pct:0, note:"远程质检或委托当地", risk:"中" },
-      { id:14, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"交付阶段", task:"迪拜落地交付 🎯", start:"2026-08-25", end:"2026-08-30", owner:"销售", status:"待开始", pct:0, note:"确认现场布置及验收", risk:"中" },
+      { id:13, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"质检阶段", task:"内部质检", start:"2026-08-20", end:"2026-08-25", owner:"阿尔曼", status:"待开始", pct:0, note:"远程质检或委托当地", risk:"中" },
+      { id:14, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"交付阶段", task:"迪拜落地交付 🎯", start:"2026-08-25", end:"2026-08-30", owner:"阿尔曼", status:"待开始", pct:0, note:"确认现场布置及验收", risk:"中" },
     ],
     todos: [
       { id:1, project:"日本yodo仙台展桌", category:"展桌", task:"跟进供应商大货制作进度（要照片/视频）", priority:"紧急", due:"2026-07-22", ref:"排期#4", status:"待办", note:"每日一次" },
