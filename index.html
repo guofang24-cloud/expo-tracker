@@ -230,36 +230,34 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
 const TODAY = new Date(2026, 6, 22);
 
 function loadData() {
-  const saved = localStorage.getItem('expo_data2');
+  const saved = localStorage.getItem('expo_data3');
   if (saved) return JSON.parse(saved);
   return {
     projects: [
-      { id:"p1", name:"日本yodo仙台展桌", category:"展桌", deadline:"2026-07-31", team:"设计:方镱静 / 销售:彭建桥 / 采购:何嘉文 / 供应商:兴俊诚", desc:"1pcs 视频展桌（含内置发声喇叭）" }
+      { id:"p1", name:"日本yodo仙台展桌", category:"展桌", deadline:"2026-07-31", team:"设计:方镱静 / 销售:彭建桥 / 采购:何嘉文 / 供应商:兴俊诚", desc:"1pcs 视频展桌" }
     ],
     tasks: [
       { id:1, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"设计阶段", task:"概念设计及内部审核", start:"2026-07-08", end:"2026-07-14", owner:"方镱静", status:"已完成", pct:100, note:"", risk:"" },
       { id:2, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"设计阶段", task:"尺寸图纸输出", start:"2026-07-12", end:"2026-07-16", owner:"方镱静", status:"已完成", pct:100, note:"", risk:"" },
       { id:3, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"深化阶段", task:"供应商深化施工图纸", start:"2026-07-15", end:"2026-07-19", owner:"兴俊诚", status:"已完成", pct:100, note:"", risk:"" },
-      { id:4, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"制作阶段", task:"供应商大货制作（含发声喇叭结构）", start:"2026-07-19", end:"2026-07-27", owner:"兴俊诚", status:"进行中", pct:40, note:"首次发声方案，关键风险点", risk:"高" },
-      { id:5, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"制作阶段", task:"中途验收：检查大货半成品 + 发声喇叭测试", start:"2026-07-26", end:"2026-07-26", owner:"方镱静", status:"待开始", pct:0, note:"提前与供应商约时间", risk:"高" },
-      { id:6, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"质检阶段", task:"内部质检 + 发声功能专项测试", start:"2026-07-28", end:"2026-07-29", owner:"方镱静", status:"待开始", pct:0, note:"准备测试视频/音频源文件", risk:"高" },
-      { id:7, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"交付阶段", task:"包装及出库准备（喇叭部位额外加固）", start:"2026-07-29", end:"2026-07-30", owner:"何嘉文", status:"待开始", pct:0, note:"", risk:"中" },
+      { id:4, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"制作阶段", task:"供应商大货制作", start:"2026-07-19", end:"2026-07-27", owner:"兴俊诚", status:"进行中", pct:60, note:"", risk:"" },
+      { id:5, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"制作阶段", task:"中途验收：检查大货半成品", start:"2026-07-26", end:"2026-07-26", owner:"方镱静", status:"待开始", pct:0, note:"提前与供应商约时间", risk:"" },
+      { id:6, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"质检阶段", task:"内部质检", start:"2026-07-28", end:"2026-07-29", owner:"方镱静", status:"待开始", pct:0, note:"", risk:"" },
+      { id:7, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"交付阶段", task:"包装及出库准备", start:"2026-07-29", end:"2026-07-30", owner:"何嘉文", status:"待开始", pct:0, note:"", risk:"" },
       { id:8, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"交付阶段", task:"送货入库 🎯 硬性截止", start:"2026-07-31", end:"2026-07-31", owner:"彭建桥", status:"待开始", pct:0, note:"提前预约车辆 + 确认仓库接收人", risk:"中" },
     ],
     todos: [
-      { id:1, project:"日本yodo仙台展桌", category:"展桌", task:"联系兴俊诚，要求提交发声喇叭规格书+测试视频", priority:"紧急", due:"2026-07-23", ref:"排期#5", status:"待办", note:"明天截止！" },
-      { id:2, project:"日本yodo仙台展桌", category:"展桌", task:"跟进供应商今日大货制作进度（要照片/视频）", priority:"紧急", due:"2026-07-22", ref:"排期#4", status:"待办", note:"每日一次" },
-      { id:3, project:"日本yodo仙台展桌", category:"展桌", task:"准备喇叭备用方案（外置蓝牙音箱选型）", priority:"紧急", due:"2026-07-25", ref:"排期#5", status:"待办", note:"周五前完成" },
-      { id:4, project:"日本yodo仙台展桌", category:"展桌", task:"安排7/26到供应商处中途验收", priority:"重要", due:"2026-07-26", ref:"排期#5", status:"待办", note:"提前一天约时间" },
-      { id:5, project:"日本yodo仙台展桌", category:"展桌", task:"收到供应商大货完工通知后确认", priority:"重要", due:"2026-07-27", ref:"排期#4", status:"待办", note:"完工当天确认" },
-      { id:6, project:"日本yodo仙台展桌", category:"展桌", task:"内部质检 + 发声专项测试", priority:"紧急", due:"2026-07-28", ref:"排期#6", status:"待办", note:"提前准备测试素材" },
-      { id:7, project:"日本yodo仙台展桌", category:"展桌", task:"确认包装方案 + 物流车辆预约", priority:"重要", due:"2026-07-29", ref:"排期#7/8", status:"待办", note:"喇叭部位加固" },
-      { id:8, project:"日本yodo仙台展桌", category:"展桌", task:"确认7/31送货入库完成 + 拍照留档", priority:"普通", due:"2026-07-31", ref:"排期#8", status:"待办", note:"硬性截止日" },
+      { id:1, project:"日本yodo仙台展桌", category:"展桌", task:"跟进供应商大货制作进度（要照片/视频）", priority:"紧急", due:"2026-07-22", ref:"排期#4", status:"待办", note:"每日一次" },
+      { id:2, project:"日本yodo仙台展桌", category:"展桌", task:"安排7/26到供应商处中途验收", priority:"重要", due:"2026-07-26", ref:"排期#5", status:"待办", note:"提前一天约时间" },
+      { id:3, project:"日本yodo仙台展桌", category:"展桌", task:"收到供应商大货完工通知后确认", priority:"重要", due:"2026-07-27", ref:"排期#4", status:"待办", note:"完工当天确认" },
+      { id:4, project:"日本yodo仙台展桌", category:"展桌", task:"内部质检", priority:"重要", due:"2026-07-28", ref:"排期#6", status:"待办", note:"" },
+      { id:5, project:"日本yodo仙台展桌", category:"展桌", task:"确认包装方案 + 物流车辆预约", priority:"重要", due:"2026-07-29", ref:"排期#7/8", status:"待办", note:"" },
+      { id:6, project:"日本yodo仙台展桌", category:"展桌", task:"确认7/31送货入库完成 + 拍照留档", priority:"普通", due:"2026-07-31", ref:"排期#8", status:"待办", note:"硬性截止日" },
     ],
     risks: [
-      { id:"R01", project:"日本yodo仙台展桌", category:"展桌", level:"高", type:"技术", desc:"发声喇叭首次制作，供应商无内置音箱展桌经验", trigger:"7/26验收喇叭不达标 / 7/28终检不合格", action:"⚡ 7/23前要到喇叭测试视频", solution:"【预防】7/23前要规格书+测试视频，准备外置备用方案；【应急】启用备用方案，与客户沟通", status:"监控中" },
-      { id:"R02", project:"日本yodo仙台展桌", category:"展桌", level:"高", type:"进度", desc:"只剩9天，大货制作+质检+交付时间紧迫", trigger:"7/27供应商未完工 / 质检后需返工", action:"⚡ 每日跟供应商要进度照片", solution:"【预防】每日跟进进度，7/27硬性完工；【应急】协调加班，评估简化非关键工序", status:"监控中" },
-      { id:"R03", project:"日本yodo仙台展桌", category:"展桌", level:"中", type:"质量", desc:"单件无备品，损坏/不合格没有替代品", trigger:"质检不合格 / 运输损坏", action:"📦 包装时重点检查喇叭部位", solution:"【预防】包装加固喇叭部位，拍照留档；【应急】确认供应商备料和返工周期", status:"已受控" },
+      { id:"R01", project:"日本yodo仙台展桌", category:"展桌", level:"—", type:"技术", desc:"发声喇叭方案已取消，此风险已消除", trigger:"—", action:"—", solution:"—", status:"已关闭" },
+      { id:"R02", project:"日本yodo仙台展桌", category:"展桌", level:"中", type:"进度", desc:"距离交付日期紧张，制作+质检+交付需紧凑安排", trigger:"7/27供应商未完工 / 质检后需返工", action:"⚡ 每日跟供应商要进度照片", solution:"【预防】每日跟进进度，7/27硬性完工；【应急】协调加班，评估简化非关键工序", status:"监控中" },
+      { id:"R03", project:"日本yodo仙台展桌", category:"展桌", level:"中", type:"质量", desc:"单件无备品，损坏/不合格没有替代品", trigger:"质检不合格 / 运输损坏", action:"📦 包装时重点检查", solution:"【预防】包装加固，拍照留档；【应急】确认供应商备料和返工周期", status:"已受控" },
       { id:"R04", project:"日本yodo仙台展桌", category:"展桌", level:"中", type:"沟通", desc:"四方协作信息可能遗漏或延迟", trigger:"需求变更未同步 / 供应商理解偏差", action:"✅ 深化图已签字确认", solution:"【预防】钉钉群留痕，关键节点书面确认；【应急】发现偏差立即群内@责任人", status:"已受控" },
       { id:"R05", project:"日本yodo仙台展桌", category:"展桌", level:"低", type:"物流", desc:"送货入库环节车辆/仓库接收出问题", trigger:"物流车辆不可用 / 仓库无人接收", action:"📞 7/30确认车辆和仓库", solution:"【预防】7/30前预约车辆，确认仓库信息；【应急】备用物流，协调次日入库", status:"已受控" },
     ]
@@ -267,7 +265,7 @@ function loadData() {
 }
 
 let data = loadData();
-function saveData() { localStorage.setItem('expo_data2', JSON.stringify(data)); }
+function saveData() { localStorage.setItem('expo_data3', JSON.stringify(data)); }
 
 function daysLeft(d) { return Math.ceil((new Date(d) - TODAY) / 86400000); }
 function statusTag(s) {
