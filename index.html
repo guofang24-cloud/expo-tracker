@@ -230,7 +230,7 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
 const TODAY = new Date(2026, 6, 22);
 
 function loadData() {
-  const saved = localStorage.getItem('expo_data3');
+  const saved = localStorage.getItem('expo_data4');
   if (saved) return JSON.parse(saved);
   return {
     projects: [
@@ -277,7 +277,7 @@ function loadData() {
 }
 
 let data = loadData();
-function saveData() { localStorage.setItem('expo_data3', JSON.stringify(data)); }
+function saveData() { localStorage.setItem('expo_data4', JSON.stringify(data)); }
 
 function daysLeft(d) { return Math.ceil((new Date(d) - TODAY) / 86400000); }
 function statusTag(s) {
