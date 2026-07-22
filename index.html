@@ -193,12 +193,27 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
   <div id="categorySections"></div>
 </section>
 <section class="panel" id="panel-schedule">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+    <label style="font-size:12px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px">
+      <input type="checkbox" id="hideDoneTasks" checked onchange="renderSchedule()"> 隐藏已完成
+    </label>
+  </div>
   <div class="split-layout" id="scheduleLayout"></div>
 </section>
 <section class="panel" id="panel-todos">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+    <label style="font-size:12px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px">
+      <input type="checkbox" id="hideDoneTodos" checked onchange="renderTodos()"> 隐藏已完成
+    </label>
+  </div>
   <div class="split-layout" id="todosLayout"></div>
 </section>
 <section class="panel" id="panel-risks">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+    <label style="font-size:12px;color:var(--muted);cursor:pointer;display:flex;align-items:center;gap:6px">
+      <input type="checkbox" id="hideClosedRisks" checked onchange="renderRisks()"> 隐藏已关闭
+    </label>
+  </div>
   <div class="split-layout" id="risksLayout"></div>
 </section>
 </main>
@@ -255,7 +270,7 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
 const TODAY = new Date(2026, 6, 22);
 
 function loadData() {
-  const saved = localStorage.getItem('expo_data8');
+  const saved = localStorage.getItem('expo_data9');
   if (saved) return JSON.parse(saved);
   return {
     projects: [
@@ -313,7 +328,7 @@ function loadData() {
 }
 
 let data = loadData();
-function saveData() { localStorage.setItem('expo_data8', JSON.stringify(data)); }
+function saveData() { localStorage.setItem('expo_data9', JSON.stringify(data)); }
 
 function daysLeft(d) { return Math.ceil((new Date(d) - TODAY) / 86400000); }
 function statusTag(s) {
@@ -417,13 +432,14 @@ function renderProjGroup(projName, cat, items, renderRow) {
 }
 
 function renderSchedule() {
+  const hideDone = document.getElementById('hideDoneTasks')?.checked ?? true;
   const cats = [
     { id: '专区', icon: '🏢', title: '专区项目排期', cls: 'zone', empty: '暂无专区任务' },
     { id: '展桌', icon: '🪑', title: '展桌项目排期', cls: 'desk', empty: '暂无展桌任务' }
   ];
   let html = '';
   cats.forEach(cat => {
-    const items = data.tasks.filter(t => t.category === cat.id);
+    const items = data.tasks.filter(t => t.category === cat.id && (!hideDone || t.status !== '已完成'));
     const grouped = {}; items.forEach(t => { if (!grouped[t.project]) grouped[t.project] = []; grouped[t.project].push(t); });
     const renderRow = (its) => `<table><thead><tr><th>阶段</th><th>任务</th><th>截止</th><th>负责人</th><th>状态</th><th>风险</th></tr></thead><tbody>${its.map(t => `<tr><td>${t.phase}</td><td>${t.task}</td><td>${t.end} (${daysLeft(t.end)}天)</td><td>${t.owner}</td><td>${statusSelect(t.id,t.status,'task')}</td><td>${riskTag(t.risk)}</td></tr>`).join('')}</tbody></table>`;
     const groupFn = (its) => {
@@ -436,13 +452,14 @@ function renderSchedule() {
 }
 
 function renderTodos() {
+  const hideDone = document.getElementById('hideDoneTodos')?.checked ?? true;
   const cats = [
     { id: '专区', icon: '🏢', title: '专区待办', cls: 'zone', empty: '暂无专区待办' },
     { id: '展桌', icon: '🪑', title: '展桌待办', cls: 'desk', empty: '暂无展桌待办' }
   ];
   let html = '';
   cats.forEach(cat => {
-    const items = data.todos.filter(t => t.category === cat.id);
+    const items = data.todos.filter(t => t.category === cat.id && (!hideDone || t.status !== '已完成'));
     const grouped = {}; items.forEach(t => { if (!grouped[t.project]) grouped[t.project] = []; grouped[t.project].push(t); });
     const renderRow = (its) => `<table><thead><tr><th>待办</th><th>优先级</th><th>截止</th><th>状态</th><th>备注</th></tr></thead><tbody>${its.map(t => `<tr><td>${t.task}</td><td>${priorityTag(t.priority)}</td><td>${t.due} (${daysLeft(t.due)}天)</td><td>${statusSelect(t.id,t.status,'todo')}</td><td style="font-size:11px;color:var(--muted)">${t.note}</td></tr>`).join('')}</tbody></table>`;
     const groupFn = (its) => !Object.keys(grouped).length ? '<div class="split-col-empty">'+cat.empty+'</div>' : Object.keys(grouped).map(pn => renderProjGroup(pn, cat.id, grouped[pn], renderRow)).join('');
@@ -452,13 +469,14 @@ function renderTodos() {
 }
 
 function renderRisks() {
+  const hideClosed = document.getElementById('hideClosedRisks')?.checked ?? true;
   const cats = [
     { id: '专区', icon: '🏢', title: '专区风险', cls: 'zone', empty: '暂无专区风险' },
     { id: '展桌', icon: '🪑', title: '展桌风险', cls: 'desk', empty: '暂无展桌风险' }
   ];
   let html = '';
   cats.forEach(cat => {
-    const items = data.risks.filter(r => r.category === cat.id);
+    const items = data.risks.filter(r => r.category === cat.id && (!hideClosed || r.status !== '已关闭'));
     const grouped = {}; items.forEach(r => { if (!grouped[r.project]) grouped[r.project] = []; grouped[r.project].push(r); });
     const renderRow = (its) => `<table><thead><tr><th>ID</th><th>等级</th><th>类别</th><th>描述</th><th>关键行动</th><th>状态</th></tr></thead><tbody>${its.map(r => `<tr><td>${r.id}</td><td>${riskTag(r.level)}</td><td>${r.type}</td><td>${r.desc}</td><td style="font-size:11px;font-weight:600">${r.action}</td><td>${statusSelect(r.id,r.status,'risk')}</td></tr>`).join('')}</tbody></table>`;
     const groupFn = (its) => !Object.keys(grouped).length ? '<div class="split-col-empty">'+cat.empty+'</div>' : Object.keys(grouped).map(pn => renderProjGroup(pn, cat.id, grouped[pn], renderRow)).join('');
