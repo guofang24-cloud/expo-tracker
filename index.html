@@ -425,21 +425,31 @@ ${todoList}
 === 风险登记 ===
 ${riskList}
 
-=== 你可以执行的操作 ===
-当用户要求更新数据时，在回复中用以下JSON格式返回操作指令（可以多条，每条一行）：
+=== 数据操作指令 ===
+当用户要求更新数据时，你必须严格按照以下格式操作。这是强制执行，不可省略：
 
+1. 先给出文字分析和建议
+2. 然后在回复末尾添加一个 ```json 代码块，每行一条JSON指令
+
+格式示例（必须严格遵守）：
+```json
 {"action":"update_task","id":4,"status":"进行中","pct":60}
 {"action":"update_todo","id":1,"status":"已完成"}
-{"action":"update_risk","id":"R01","status":"已关闭"}
-{"action":"add_todo","project":"项目名","category":"展桌","task":"新待办","priority":"紧急","due":"2026-07-25","ref":"排期#5","note":"备注"}
-{"action":"add_risk","project":"项目名","category":"展桌","level":"高","type":"技术","desc":"描述","trigger":"触发条件","action":"行动","solution":"应对方案"}
+```
 
-规则：
-1. 先分析用户的问题，给出有帮助的文字回复
-2. 如果需要更新数据，在回复末尾加上JSON操作指令
-3. 主动提醒用户即将到期的待办和高风险项
-4. 回复简洁有力，直接给行动建议
-5. 每天第一次对话时简要汇报项目整体状态`;
+可用操作：
+- update_task: id, status(已完成/进行中/待开始/已延期), pct(数字0-100), note(可选字符串)
+- update_todo: id, status(已完成/待办/已延期)  
+- update_risk: id, status(已触发/监控中/已受控/已关闭)
+- add_todo: project, category(专区/展桌), task, priority(紧急/重要/普通), due(YYYY-MM-DD), ref, note
+- add_risk: project, category, level(高/中/低), type, desc, trigger, action, solution
+
+关键规则：
+1. JSON 必须放在 ```json 和 ``` 之间，每行一条完整JSON
+2. JSON 中不要有注释，不要有换行，严格单行
+3. 即使用户只说"更新某某"，你也必须输出JSON指令
+4. 完成任务后告诉用户更新了什么
+5. 如有即将到期的待办或高风险，主动提醒`;
 }
 
 async function testConnection() {
@@ -478,20 +488,38 @@ function loadChatHistory() {
 loadChatHistory();
 
 function parseAndExecCommands(text) {
-  const lines=text.split('\n');let count=0;
-  for(const line of lines) {
-    const m=line.match(/\{("action":[^}]+)\}/);
-    if(!m)continue;
-    try{
-      const cmd=JSON.parse(m[0]);
-      if(cmd.action==='update_task'){const t=data.tasks.find(x=>x.id===cmd.id);if(t){if(cmd.status)t.status=cmd.status;if(cmd.pct!==undefined)t.pct=cmd.pct;if(cmd.note!==undefined)t.note=cmd.note;count++;}}
-      else if(cmd.action==='update_todo'){const t=data.todos.find(x=>x.id===cmd.id);if(t){if(cmd.status)t.status=cmd.status;count++;}}
-      else if(cmd.action==='update_risk'){const r=data.risks.find(x=>x.id===cmd.id);if(r){if(cmd.status)r.status=cmd.status;count++;}}
-      else if(cmd.action==='add_todo'){const newId=Math.max(...data.todos.map(t=>t.id),0)+1;data.todos.push({id:newId,project:cmd.project,category:cmd.category,task:cmd.task,priority:cmd.priority||'普通',due:cmd.due,ref:cmd.ref||'',status:'待办',note:cmd.note||''});count++;}
-      else if(cmd.action==='add_risk'){const newId='R'+String(Math.max(...data.risks.map(r=>parseInt(r.id.slice(1))),0)+1).padStart(2,'0');data.risks.push({id:newId,project:cmd.project,category:cmd.category,level:cmd.level,type:cmd.type,desc:cmd.desc,trigger:cmd.trigger,action:cmd.action,solution:cmd.solution,status:'监控中'});count++;}
-    }catch(e){}
+  // Extract ```json code blocks
+  const blockRe = /```json\s*\n([\s\S]*?)```/g;
+  let count = 0, match;
+  while ((match = blockRe.exec(text)) !== null) {
+    const lines = match[1].split('\n');
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed || !trimmed.startsWith('{')) continue;
+      try {
+        const cmd = JSON.parse(trimmed);
+        if (cmd.action === 'update_task') {
+          const t = data.tasks.find(x => x.id === cmd.id);
+          if (t) { if (cmd.status) t.status = cmd.status; if (cmd.pct !== undefined) t.pct = cmd.pct; if (cmd.note !== undefined) t.note = cmd.note; count++; }
+        } else if (cmd.action === 'update_todo') {
+          const t = data.todos.find(x => x.id === cmd.id);
+          if (t) { if (cmd.status) t.status = cmd.status; count++; }
+        } else if (cmd.action === 'update_risk') {
+          const r = data.risks.find(x => x.id === cmd.id);
+          if (r) { if (cmd.status) r.status = cmd.status; count++; }
+        } else if (cmd.action === 'add_todo') {
+          const newId = Math.max(...data.todos.map(t => t.id), 0) + 1;
+          data.todos.push({ id: newId, project: cmd.project, category: cmd.category, task: cmd.task, priority: cmd.priority || '普通', due: cmd.due, ref: cmd.ref || '', status: '待办', note: cmd.note || '' });
+          count++;
+        } else if (cmd.action === 'add_risk') {
+          const newId = 'R' + String(Math.max(...data.risks.map(r => parseInt(r.id.slice(1))), 0) + 1).padStart(2, '0');
+          data.risks.push({ id: newId, project: cmd.project, category: cmd.category, level: cmd.level, type: cmd.type, desc: cmd.desc, trigger: cmd.trigger, action: cmd.action, solution: cmd.solution, status: '监控中' });
+          count++;
+        }
+      } catch (e) { console.log('JSON parse error:', trimmed, e); }
+    }
   }
-  if(count>0){saveData();renderAll();}
+  if (count > 0) { saveData(); renderAll(); }
   return count;
 }
 
@@ -528,9 +556,9 @@ async function sendMessage() {
 
     // Parse commands
     const cmdCount=parseAndExecCommands(reply);
-    // Strip JSON commands from display
-    reply=reply.replace(/\n?\{("action":[^}]+)\}/g,'');
-    if(cmdCount>0){reply+=`\n\n<span class="update-tag">✅ 已更新 ${cmdCount} 项数据</span>`;}
+    // Strip JSON code blocks from display (already executed)
+    reply = reply.replace(/```json[\s\S]*?```/g, '');
+    if (cmdCount > 0) { reply += `\n\n<span class="update-tag">✅ 已更新 ${cmdCount} 项数据</span>`; }
 
     addChatMessage('assistant',reply);
   }catch(e){
