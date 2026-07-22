@@ -230,12 +230,13 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
 const TODAY = new Date(2026, 6, 22);
 
 function loadData() {
-  const saved = localStorage.getItem('expo_data4');
+  const saved = localStorage.getItem('expo_data5');
   if (saved) return JSON.parse(saved);
   return {
     projects: [
       { id:"p1", name:"日本yodo仙台展桌", category:"展桌", deadline:"2026-07-31", team:"设计:方镱静 / 销售:彭建桥 / 采购:何嘉文 / 供应商:兴俊诚", desc:"1pcs 视频展桌" },
-      { id:"p2", name:"迪拜Emax渠道being专区", category:"专区", deadline:"2026-08-30", team:"设计:方镱静 / 销售:阿尔曼 / 施工:迪拜施工方", desc:"迪拜当地制作 · 设计已完成" }
+      { id:"p2", name:"迪拜Emax渠道being专区", category:"专区", deadline:"2026-08-30", team:"设计:方镱静 / 销售:阿尔曼 / 施工:迪拜施工方", desc:"迪拜当地制作 · 设计已完成" },
+      { id:"p3", name:"2026 新加坡Challenger Jurong Point 墙面专区", category:"专区", deadline:"2026-08-30", team:"设计:方镱静 / 销售:Suet Li Yang / 施工:新加坡施工方", desc:"新加坡当地制作 · 设计已完成 · 待确认画面及图纸" }
     ],
     tasks: [
       { id:1, project:"日本yodo仙台展桌", projectId:"p1", category:"展桌", phase:"设计阶段", task:"概念设计及内部审核", start:"2026-07-08", end:"2026-07-14", owner:"方镱静", status:"已完成", pct:100, note:"", risk:"" },
@@ -252,6 +253,12 @@ function loadData() {
       { id:12, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"制作阶段", task:"迪拜当地制作", start:"2026-07-28", end:"2026-08-20", owner:"迪拜施工方", status:"待开始", pct:0, note:"图纸确认后启动", risk:"中" },
       { id:13, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"质检阶段", task:"内部质检", start:"2026-08-20", end:"2026-08-25", owner:"阿尔曼", status:"待开始", pct:0, note:"远程质检或委托当地", risk:"中" },
       { id:14, project:"迪拜Emax渠道being专区", projectId:"p2", category:"专区", phase:"交付阶段", task:"迪拜落地交付 🎯", start:"2026-08-25", end:"2026-08-30", owner:"阿尔曼", status:"待开始", pct:0, note:"确认现场布置及验收", risk:"中" },
+      { id:15, project:"2026 新加坡Challenger Jurong Point 墙面专区", projectId:"p3", category:"专区", phase:"设计阶段", task:"概念设计及内部审核", start:"2026-07-01", end:"2026-07-10", owner:"方镱静", status:"已完成", pct:100, note:"", risk:"" },
+      { id:16, project:"2026 新加坡Challenger Jurong Point 墙面专区", projectId:"p3", category:"专区", phase:"设计阶段", task:"尺寸图纸输出", start:"2026-07-10", end:"2026-07-18", owner:"方镱静", status:"已完成", pct:100, note:"", risk:"" },
+      { id:17, project:"2026 新加坡Challenger Jurong Point 墙面专区", projectId:"p3", category:"专区", phase:"深化阶段", task:"确认专区画面 + 联系施工方反馈深化施工图纸审核", start:"2026-07-18", end:"2026-07-28", owner:"Suet Li Yang", status:"进行中", pct:20, note:"画面方案待定+施工方图纸待确认", risk:"高" },
+      { id:18, project:"2026 新加坡Challenger Jurong Point 墙面专区", projectId:"p3", category:"专区", phase:"制作阶段", task:"新加坡当地制作", start:"2026-07-28", end:"2026-08-20", owner:"新加坡施工方", status:"待开始", pct:0, note:"图纸确认后启动", risk:"中" },
+      { id:19, project:"2026 新加坡Challenger Jurong Point 墙面专区", projectId:"p3", category:"专区", phase:"质检阶段", task:"内部质检", start:"2026-08-20", end:"2026-08-25", owner:"Suet Li Yang", status:"待开始", pct:0, note:"远程质检或委托当地", risk:"中" },
+      { id:20, project:"2026 新加坡Challenger Jurong Point 墙面专区", projectId:"p3", category:"专区", phase:"交付阶段", task:"新加坡落地交付 🎯", start:"2026-08-25", end:"2026-08-30", owner:"Suet Li Yang", status:"待开始", pct:0, note:"确认现场布置及验收", risk:"中" },
     ],
     todos: [
       { id:1, project:"日本yodo仙台展桌", category:"展桌", task:"跟进供应商大货制作进度（要照片/视频）", priority:"紧急", due:"2026-07-22", ref:"排期#4", status:"待办", note:"每日一次" },
@@ -262,6 +269,8 @@ function loadData() {
       { id:6, project:"日本yodo仙台展桌", category:"展桌", task:"确认7/31送货入库完成 + 拍照留档", priority:"普通", due:"2026-07-31", ref:"排期#8", status:"待办", note:"硬性截止日" },
       { id:7, project:"迪拜Emax渠道being专区", category:"专区", task:"催促迪拜施工方反馈深化图纸审核意见", priority:"紧急", due:"2026-07-25", ref:"排期#11", status:"待办", note:"本周内必须拿到反馈" },
       { id:8, project:"迪拜Emax渠道being专区", category:"专区", task:"确认迪拜当地制作排期及交付时间表", priority:"重要", due:"2026-07-30", ref:"排期#12", status:"待办", note:"图纸确认后立即推进" },
+      { id:9, project:"2026 新加坡Challenger Jurong Point 墙面专区", category:"专区", task:"确认专区画面方案（设计稿定稿）", priority:"紧急", due:"2026-07-25", ref:"排期#17", status:"待办", note:"画面不定无法推进图纸" },
+      { id:10, project:"2026 新加坡Challenger Jurong Point 墙面专区", category:"专区", task:"联系新加坡施工方反馈深化施工图纸审核", priority:"紧急", due:"2026-07-25", ref:"排期#17", status:"待办", note:"与画面同步推进" },
     ],
     risks: [
       { id:"R01", project:"日本yodo仙台展桌", category:"展桌", level:"—", type:"技术", desc:"发声喇叭方案已取消，此风险已消除", trigger:"—", action:"—", solution:"—", status:"已关闭" },
@@ -272,12 +281,14 @@ function loadData() {
       { id:"R06", project:"迪拜Emax渠道being专区", category:"专区", level:"高", type:"沟通", desc:"迪拜施工方远在海外，时差+语言可能导致沟通延迟或理解偏差", trigger:"施工方未按时反馈图纸 / 反馈内容不符合要求", action:"⚡ 7/25前拿到施工方书面审核反馈", solution:"【预防】建立WhatsApp/邮件双通道，每日跟进；【应急】安排当地人员当面沟通", status:"监控中" },
       { id:"R07", project:"迪拜Emax渠道being专区", category:"专区", level:"高", type:"进度", desc:"迪拜当地制作周期不可控，图纸确认后才能启动制作", trigger:"7/28前图纸未确认 / 施工方排期延后", action:"⚡ 7/25前拿到图纸反馈，7/28前确认施工排期", solution:"【预防】并行推进：一边等图纸反馈一边让施工方预排产能；【应急】评估国内制作+物流方案作备选", status:"监控中" },
       { id:"R08", project:"迪拜Emax渠道being专区", category:"专区", level:"中", type:"质量", desc:"远程质检困难，无法现场把控制作质量", trigger:"施工方偷工减料 / 与设计图纸不符", action:"📸 要求施工方每周发进度照片", solution:"【预防】约定关键节点拍照/视频验收；【应急】8月20日前安排视频连线验收", status:"监控中" },
+      { id:"R09", project:"2026 新加坡Challenger Jurong Point 墙面专区", category:"专区", level:"高", type:"设计", desc:"专区画面方案未确认，直接阻塞深化图纸和制作启动", trigger:"7/25前画面未定稿 / 客户反复修改", action:"⚡ 7/25前锁定画面方案", solution:"【预防】本周内与客户确认画面方向并定稿；【应急】先基于现有方向出图纸，画面可后续微调", status:"监控中" },
+      { id:"R10", project:"2026 新加坡Challenger Jurong Point 墙面专区", category:"专区", level:"高", type:"进度", desc:"画面+图纸双重待确认，制作启动时间被严重压缩", trigger:"7/28前任一未确认 / 施工方排期冲突", action:"⚡ 7/25前必须拿到画面确认+图纸反馈", solution:"【预防】画面和图纸并行推进不要串行；【应急】预留加班制作预算，与施工方提前锁定产能", status:"监控中" },
     ]
   };
 }
 
 let data = loadData();
-function saveData() { localStorage.setItem('expo_data4', JSON.stringify(data)); }
+function saveData() { localStorage.setItem('expo_data5', JSON.stringify(data)); }
 
 function daysLeft(d) { return Math.ceil((new Date(d) - TODAY) / 86400000); }
 function statusTag(s) {
