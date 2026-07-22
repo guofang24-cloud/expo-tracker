@@ -439,6 +439,8 @@ ${riskList}
 - update_task: id, status(已完成/进行中/待开始/已延期), pct(数字0-100), note(可选字符串)
 - update_todo: id, status(已完成/待办/已延期)  
 - update_risk: id, status(已触发/监控中/已受控/已关闭)
+- add_project: name(项目名), category(专区/展桌), deadline(YYYY-MM-DD), team(团队信息), desc(项目描述), tasks(可选数组:[{phase, task, start, end, owner}])
+- add_task: project(项目名), category, phase(阶段), task(任务名), start, end, owner, note, risk
 - add_todo: project, category(专区/展桌), task, priority(紧急/重要/普通), due(YYYY-MM-DD), ref, note
 - add_risk: project, category, level(高/中/低), type, desc, trigger, action, solution
 
@@ -512,6 +514,22 @@ function parseAndExecCommands(text) {
         } else if (cmd.action === 'add_risk') {
           const newId = 'R' + String(Math.max(...data.risks.map(r => parseInt(r.id.slice(1))), 0) + 1).padStart(2, '0');
           data.risks.push({ id: newId, project: cmd.project, category: cmd.category, level: cmd.level, type: cmd.type, desc: cmd.desc, trigger: cmd.trigger, action: cmd.action, solution: cmd.solution, status: '监控中' });
+          count++;
+        } else if (cmd.action === 'add_project') {
+          const pid = 'p' + (data.projects.length + 1);
+          data.projects.push({ id: pid, name: cmd.name, category: cmd.category || '展桌', deadline: cmd.deadline, team: cmd.team || '', desc: cmd.desc || '' });
+          // Optionally add initial tasks
+          if (cmd.tasks && Array.isArray(cmd.tasks)) {
+            cmd.tasks.forEach(t => {
+              const tid = Math.max(...data.tasks.map(x => x.id), 0) + 1;
+              data.tasks.push({ id: tid, project: cmd.name, projectId: pid, category: cmd.category || '展桌', phase: t.phase || '制作阶段', task: t.task, start: t.start || cmd.deadline, end: t.end || cmd.deadline, owner: t.owner || '', status: '待开始', pct: 0, note: t.note || '', risk: t.risk || '' });
+            });
+          }
+          count++;
+        } else if (cmd.action === 'add_task') {
+          const tid = Math.max(...data.tasks.map(x => x.id), 0) + 1;
+          const proj = data.projects.find(p => p.name === cmd.project);
+          data.tasks.push({ id: tid, project: cmd.project, projectId: proj ? proj.id : '', category: cmd.category || '展桌', phase: cmd.phase || '制作阶段', task: cmd.task, start: cmd.start || '', end: cmd.end || '', owner: cmd.owner || '', status: '待开始', pct: 0, note: cmd.note || '', risk: cmd.risk || '' });
           count++;
         }
       } catch (e) { console.log('JSON parse error:', trimmed, e); }
