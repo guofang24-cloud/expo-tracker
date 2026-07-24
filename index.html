@@ -267,7 +267,7 @@ select.status-select{padding:2px 6px;border:1px solid var(--border);border-radiu
 </div>
 
 <script>
-const TODAY = new Date(2026, 6, 22);
+const TODAY = new Date(); // 实时日期
 
 function loadData() {
   const saved = localStorage.getItem('expo_data10');
@@ -533,9 +533,10 @@ function getSystemPrompt() {
   const todoList=data.todos.map(t=>`  #${t.id} [${t.status}] ${t.priority} | ${t.task} | 截止:${t.due} | ${t.note||''}`).join('\n');
   const riskList=data.risks.map(r=>`  ${r.id} [${r.level}/${r.status}] ${r.type}: ${r.desc} | 触发:${r.trigger}`).join('\n');
 
+  const todayStr = TODAY.toISOString().split('T')[0];
   return `你是零售空间项目排期管理的AI助手，帮助用户管理专区项目和展桌项目。
 
-当前日期: 2026-07-22。计算剩余天数时，days_left = (截止日期 - 2026-07-22)的天数。
+当前日期: ${todayStr}。计算剩余天数时，days_left = (截止日期 - ${todayStr})的天数。
 
 === 项目总览 ===
 ${projSummary}
