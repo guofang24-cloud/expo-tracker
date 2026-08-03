@@ -416,20 +416,20 @@ button { cursor: pointer; }
               <div class="file-icon" id="artworkIcon">＋</div>
               <div class="upload-copy">
                 <strong>画面文件</strong>
-                <small id="artworkHint">PDF / AI</small>
+                <small id="artworkHint">仅 AI 格式</small>
                 <a id="artworkLink" style="display:none" href="#" download></a>
               </div>
-              <label class="upload-action">上传<input type="file" accept=".pdf,.ai,.cdr,.psd,.eps,.jpg,.jpeg,.png,image/*,application/pdf" onchange="app.uploadFile('artwork', event)"></label>
+              <label class="upload-action">上传<input type="file" accept=".ai,application/postscript" onchange="app.uploadFile('artwork', event)"></label>
               <button class="remove-file" id="artworkRemove" style="display:none" onclick="app.removeFile('artwork')" aria-label="移除画面文件">×</button>
             </div>
             <div class="upload-card" id="drawingCard">
               <div class="file-icon" id="drawingIcon">＋</div>
               <div class="upload-copy">
                 <strong>尺寸图纸</strong>
-                <small id="drawingHint">建议 PDF</small>
+                <small id="drawingHint">仅 PDF 格式</small>
                 <a id="drawingLink" style="display:none" href="#" download></a>
               </div>
-              <label class="upload-action">上传<input type="file" accept=".pdf,.ai,.dwg,.dxf,.jpg,.jpeg,.png,image/*,application/pdf" onchange="app.uploadFile('drawing', event)"></label>
+              <label class="upload-action">上传<input type="file" accept=".pdf,application/pdf" onchange="app.uploadFile('drawing', event)"></label>
               <button class="remove-file" id="drawingRemove" style="display:none" onclick="app.removeFile('drawing')" aria-label="移除尺寸图纸">×</button>
             </div>
           </div>
@@ -620,6 +620,20 @@ const app = {
   uploadFile(kind, event) {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Validate format: artwork=AI only, drawing=PDF only
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (kind === 'artwork' && ext !== '.ai' && file.type !== 'application/postscript') {
+      this.toast('画面文件只接受 AI 格式');
+      event.target.value = '';
+      return;
+    }
+    if (kind === 'drawing' && ext !== '.pdf' && file.type !== 'application/pdf') {
+      this.toast('尺寸图纸只接受 PDF 格式');
+      event.target.value = '';
+      return;
+    }
+
     if (file.size > MAX_FILE_SIZE) {
       this.toast('文件超过 8MB 限制，请压缩后重试');
       event.target.value = '';
@@ -738,8 +752,8 @@ const app = {
     });
 
     // Upload cards
-    this.renderUploadCard('artwork', sel.artwork, 'PDF / AI');
-    this.renderUploadCard('drawing', sel.drawing, '建议 PDF');
+    this.renderUploadCard('artwork', sel.artwork, '仅 AI 格式');
+    this.renderUploadCard('drawing', sel.drawing, '仅 PDF 格式');
 
     this.updateBadge();
   },
