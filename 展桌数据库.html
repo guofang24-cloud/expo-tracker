@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>展桌数据库｜销售端 · 设计端</title>
+<meta name="description" content="展桌数据库：销售端与设计端双视图，统一管理展桌信息卡片。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='4' fill='%231d593b'/><text x='16' y='23' text-anchor='middle' fill='%23dfff4f' font-size='20' font-weight='bold'>库</text></svg>">
+<style>
+:root {
+  --ink: #17211b;
+  --muted: #68726c;
+  --line: #d9ded9;
+  --paper: #f4f3ee;
+  --white: #fff;
+  --green: #1d593b;
+  --green-dark: #12462d;
+  --lime: #dfff4f;
+  --orange: #e87722;
+  --red: #a04e3f;
+  --sidebar-w: 230px;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  color: var(--ink);
+  background: linear-gradient(rgba(23,33,27,.028) 1px, transparent 1px), linear-gradient(90deg, rgba(23,33,27,.028) 1px, transparent 1px), var(--paper);
+  background-size: 28px 28px;
+  font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+button, input, textarea, select { font: inherit; }
+button { cursor: pointer; }
+img { display: block; max-width: 100%; }
+
+/* ===== Layout ===== */
+.app { display: flex; min-height: 100vh; }
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: var(--sidebar-w);
+  flex-shrink: 0;
+  background: var(--green);
+  color: #eaf2ec;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 30;
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 12px;
+  padding: 22px 20px 20px;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+.sidebar-brand .mark {
+  width: 40px; height: 40px; flex-shrink: 0;
+  display: grid; place-items: center;
+  background: var(--lime); color: var(--green);
+  font-weight: 800; font-size: 18px; border-radius: 6px;
+}
+.sidebar-brand .brand-copy { min-width: 0; }
+.sidebar-brand strong { display: block; font-size: 16px; letter-spacing: .04em; color: #fff; }
+.sidebar-brand small { display: block; color: rgba(255,255,255,.6); font-size: 11px; margin-top: 2px; }
+
+.nav { padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.nav-label {
+  color: rgba(255,255,255,.45); font-size: 10px; letter-spacing: .18em;
+  padding: 8px 12px 6px; font-weight: 700;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; padding: 12px 14px;
+  border: 0; border-radius: 8px;
+  background: transparent; color: rgba(255,255,255,.82);
+  text-align: left; font-size: 14px; font-weight: 600;
+  transition: background .2s, color .2s;
+  position: relative;
+}
+.nav-item:hover { background: rgba(255,255,255,.1); color: #fff; }
+.nav-item.active { background: var(--lime); color: var(--green-dark); }
+.nav-item .ico {
+  width: 20px; height: 20px; display: grid; place-items: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.nav-item .count {
+  margin-left: auto; font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px;
+  background: rgba(255,255,255,.16); color: #fff;
+}
+.nav-item.active .count { background: rgba(18,70,45,.16); color: var(--green-dark); }
+
+.sidebar-foot {
+  padding: 16px 20px; border-top: 1px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.55); font-size: 11px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+/* ===== Main ===== */
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.topbar {
+  height: 64px; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(255,255,255,.9);
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  position: sticky; top: 0; z-index: 20;
+}
+.topbar .view-title { display: flex; align-items: center; gap: 10px; }
+.topbar .view-title h1 { margin: 0; font-size: 20px; letter-spacing: -.01em; }
+.topbar .view-title .tag {
+  font-size: 10px; font-weight: 700; letter-spacing: .12em;
+  color: var(--green); background: #e8efe9;
+  padding: 4px 8px; border-radius: 4px;
+}
+.top-actions { display: flex; align-items: center; gap: 10px; }
+.button {
+  border: 0; min-height: 40px; padding: 0 18px;
+  border-radius: 6px; font-weight: 700;
+  transition: transform .2s, background .2s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.button:hover { transform: translateY(-1px); }
+.button.ghost { border: 1px solid var(--line); background: var(--white); }
+.button.primary { color: white; background: var(--green); }
+.button.primary:hover { background: var(--green-dark); }
+.search {
+  height: 40px; padding: 0 12px;
+  display: flex; align-items: center; gap: 8px;
+  border: 1px solid var(--line); background: #fafaf7; border-radius: 6px;
+}
+.search input { border: 0; outline: 0; background: transparent; width: 190px; font-size: 13px; }
+
+/* ===== Content ===== */
+.content { padding: 32px; max-width: 1400px; width: 100%; margin: 0 auto; }
+.view-head {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 24px; margin-bottom: 24px; flex-wrap: wrap;
+}
+.view-head .eyebrow { margin: 0 0 6px; color: var(--green); font-weight: 800; font-size: 10px; letter-spacing: .2em; }
+.view-head h2 { margin: 0; font-size: clamp(22px, 2.6vw, 34px); letter-spacing: -.03em; }
+.view-head p { color: var(--muted); margin: 8px 0 0; max-width: 560px; }
+.view-stats { display: flex; gap: 0; background: var(--white); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.view-stats div { min-width: 100px; padding: 14px 18px; border-left: 1px solid var(--line); text-align: center; }
+.view-stats div:first-child { border-left: 0; }
+.view-stats strong, .view-stats span { display: block; }
+.view-stats strong { font-size: 22px; line-height: 1; }
+.view-stats span { color: var(--muted); font-size: 11px; margin-top: 6px; }
+
+/* ===== Card Grid ===== */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(22,38,29,.05);
+  display: flex; flex-direction: column;
+  transition: transform .2s, box-shadow .2s;
+  cursor: pointer;
+  position: relative;
+}
+.card:hover { transform: translateY(-3px); box-shadow: 0 16px 40px rgba(22,38,29,.1); }
+
+.card-cover {
+  height: 150px;
+  background: linear-gradient(135deg, #e8efe9, #d5e2d8);
+  display: grid; place-items: center;
+  color: #7d9a86; position: relative; overflow: hidden;
+}
+.card-cover img { width: 100%; height: 100%; object-fit: cover; }
+.card-cover .cover-fallback {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; letter-spacing: .06em;
+}
+.card-cover .cover-fallback .glyph { font-size: 40px; line-height: 1; opacity: .6; }
+
+.card .status-pill {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 11px; font-weight: 700; padding: 5px 10px;
+  border-radius: 20px; background: rgba(255,255,255,.92); color: #5a5f5b;
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
+}
+
+.card-body { padding: 18px 18px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.card-body .card-no { font-size: 11px; color: var(--green); font-weight: 800; letter-spacing: .08em; }
+.card-body h3 { margin: 0; font-size: 17px; letter-spacing: -.01em; }
+.card-body .model { color: var(--muted); font-size: 12px; margin-top: -4px; }
+
+/* Info rows */
+.info-rows { display: flex; flex-direction: column; gap: 7px; }
+.info-row { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+.info-row .k { color: var(--muted); font-size: 11px; flex-shrink: 0; min-width: 58px; }
+.info-row .v { font-weight: 600; }
+.info-row .v.price { color: var(--orange); font-size: 16px; }
+
+/* Tags */
+.tag-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+.chip {
+  font-size: 11px; padding: 3px 9px; border-radius: 4px;
+  background: #f0f3ee; color: #4a524c; font-weight: 600;
+}
+.chip.hl { background: #fff3d8; color: #9b651b; }
+.chip.fmt { background: #e8efe9; color: var(--green); }
+
+/* Files (design view) */
+.file-row { display: flex; flex-direction: column; gap: 6px; margin-top: 2px; }
+.file-link {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--green);
+  text-decoration: none; padding: 7px 10px;
+  border: 1px dashed #bdc6bf; border-radius: 6px; background: #fbfcfa;
+}
+.file-link:hover { background: #f4f8e8; border-color: var(--green); }
+.file-link .fext {
+  font-size: 10px; font-weight: 800; color: var(--green);
+  padding: 2px 5px; background: #e8efe9; border-radius: 3px; flex-shrink: 0;
+}
+.file-link .fname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-link.missing { color: #9aa19c; border-style: dashed; }
+.file-link.missing .fext { background: #ecefea; color: #9aa19c; }
+
+/* Note */
+.card-note {
+  font-size: 12px; color: var(--muted);
+  background: #fafaf7; border-left: 3px solid var(--line);
+  padding: 8px 10px; margin-top: 2px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.card-foot {
+  padding: 12px 18px; border-top: 1px solid #ecefea;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 11px; color: var(--muted);
+}
+.card-foot .owner { display: flex; align-items: center; gap: 6px; }
+.avatar {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--green); color: var(--lime); font-size: 11px; font-weight: 700;
+}
+
+/* Empty state */
+.empty-state {
+  grid-column: 1 / -1;
+  padding: 80px 20px; text-align: center; color: var(--muted);
+  border: 1px dashed var(--line); border-radius: 10px; background: rgba(255,255,255,.5);
+}
+.empty-state .glyph { font-size: 44px; opacity: .5; }
+.empty-state p { margin: 12px 0 18px; }
+
+/* ===== Modal ===== */
+.modal-mask {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(18,30,22,.5);
+  display: none; align-items: flex-start; justify-content: center;
+  padding: 40px 20px; overflow-y: auto;
+  backdrop-filter: blur(3px);
+}
+.modal-mask.show { display: flex; }
+.modal {
+  background: var(--white); border-radius: 12px;
+  width: 100%; max-width: 720px;
+  box-shadow: 0 30px 80px rgba(0,0,0,.25);
+  overflow: hidden;
+}
+.modal-head {
+  padding: 20px 26px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
+.modal-head h3 { margin: 0; font-size: 18px; }
+.modal-close { border: 0; background: transparent; font-size: 22px; color: var(--muted); line-height: 1; }
+.modal-close:hover { color: var(--ink); }
+.modal-body { padding: 22px 26px; max-height: 62vh; overflow-y: auto; }
+.form-section { margin-bottom: 20px; }
+.form-section:last-child { margin-bottom: 0; }
+.form-section > .sec-title {
+  font-size: 12px; font-weight: 800; color: var(--green);
+  letter-spacing: .08em; margin: 0 0 12px;
+  padding-bottom: 8px; border-bottom: 1px solid #ecefea;
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full { grid-column: 1 / -1; }
+.field > span { color: var(--muted); font-size: 11px; font-weight: 700; }
+.field input, .field textarea, .field select {
+  width: 100%; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 4px; outline: 0;
+  background: #fcfcfa; transition: border-color .2s, box-shadow .2s;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  border-color: var(--green); box-shadow: 0 0 0 3px rgba(29,89,59,.08);
+}
+.field textarea { min-height: 70px; resize: vertical; }
+.field .hint { color: var(--muted); font-size: 10px; }
+.dim-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.upload-box {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px; border: 1px dashed #bdc6bf; border-radius: 6px;
+  background: #fbfcfa; margin-top: 4px;
+}
+.upload-box .f-info { flex: 1; min-width: 0; }
+.upload-box .f-name { font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upload-box .f-hint { font-size: 10px; color: var(--muted); }
+.upload-box label { color: var(--green); font-weight: 800; font-size: 12px; cursor: pointer; white-space: nowrap; }
+.upload-box input { display: none; }
+.upload-box .rm { border: 0; background: transparent; color: #9aa19c; font-size: 16px; }
+.modal-foot {
+  padding: 16px 26px; display: flex; justify-content: space-between; align-items: center;
+  border-top: 1px solid var(--line); background: #fbfcfa;
+}
+.modal-foot .left { color: var(--red); font-size: 12px; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+  padding: 12px 24px; border-radius: 6px;
+  background: var(--ink); color: white; font-size: 13px;
+  z-index: 200; opacity: 0; transition: opacity .3s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* ===== Responsive ===== */
+@media (max-width: 860px) {
+  .app { flex-direction: column; }
+  .sidebar {
+    width: 100%; height: auto; position: static; flex-direction: row;
+    align-items: center; padding: 0 12px; flex-wrap: wrap;
+  }
+  .sidebar-brand { padding: 12px; border-bottom: 0; }
+  .sidebar-brand small { display: none; }
+  .nav { flex-direction: row; padding: 12px; gap: 8px; flex: 1; }
+  .nav-label { display: none; }
+  .nav-item { width: auto; padding: 10px 14px; }
+  .sidebar-foot { display: none; }
+  .topbar { padding: 0 16px; }
+  .search input { width: 120px; }
+  .content { padding: 20px 16px; }
+  .form-grid, .dim-row { grid-template-columns: 1fr; }
+  .view-stats { width: 100%; }
+  .view-stats div { flex: 1; }
+}
+@media (max-width: 480px) {
+  .card-grid { grid-template-columns: 1fr; }
+  .topbar .view-title h1 { font-size: 17px; }
+  .search { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="mark">库</span>
+      <div class="brand-copy"><strong>展桌数据库</strong><small>销售端 · 设计端</small></div>
+    </div>
+    <nav class="nav">
+      <span class="nav-label">视图切换</span>
+      <button class="nav-item active" data-view="sales" onclick="app.switchView('sales')">
+        <span class="ico">🛒</span>销售端
+        <span class="count" id="navCountSales">0</span>
+      </button>
+      <button class="nav-item" data-view="design" onclick="app.switchView('design')">
+        <span class="ico">✏️</span>设计端
+        <span class="count" id="navCountDesign">0</span>
+      </button>
+    </nav>
+    <div class="sidebar-foot">
+      <span>数据保存在本机浏览器</span>
+      <span id="footTotal">共 0 张展桌</span>
+    </div>
+  </aside>
+
+  <!-- ===== Main ===== -->
+  <div class="main">
+    <header class="topbar">
+      <div class="view-title">
+        <h1 id="viewTitle">销售端</h1>
+        <span class="tag" id="viewTag">SALES</span>
+      </div>
+      <div class="top-actions">
+        <label class="search">
+          <span>⌕</span>
+          <input id="searchInput" placeholder="搜索料号或名称" oninput="app.filter()">
+        </label>
+        <button class="button primary" onclick="app.openEditor()">＋ 新增展桌</button>
+      </div>
+    </header>
+
+    <div class="content">
+      <div class="view-head">
+        <div>
+          <p class="eyebrow" id="viewEyebrow">SALES VIEW · 客户视角</p>
+          <h2 id="viewHeading">面向销售的展桌信息</h2>
+          <p id="viewDesc">价格、外观、交期与卖点，快速向客户介绍每一张展桌。</p>
+        </div>
+        <div class="view-stats">
+          <div><strong id="statTotal">0</strong><span>全部展桌</span></div>
+          <div><strong id="statAvailable">0</strong><span>可售</span></div>
+          <div><strong id="statStocking">0</strong><span>制作中</span></div>
+        </div>
+      </div>
+      <div class="card-grid" id="cardGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Editor Modal ===== -->
+<div class="modal-mask" id="modalMask" onclick="if(event.target===this)app.closeEditor()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modalTitle">新增展桌</h3>
+      <button class="modal-close" onclick="app.closeEditor()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">
+        <p class="sec-title">基本信息</p>
+        <div class="form-grid">
+          <label class="field"><span>展桌料号</span><input id="ePartNo" placeholder="例如 ZT-001"></label>
+          <label class="field"><span>展桌名称</span><input id="eName" placeholder="例如 日本yodo仙台展桌"></label>
+          <label class="field"><span>型号 / 系列</span><input id="eModel" placeholder="例如 YD-2026"></label>
+          <label class="field"><span>状态</span>
+            <select id="eStatus">
+              <option value="designing">设计稿中</option>
+              <option value="review">待确认</option>
+              <option value="producing">制作中</option>
+              <option value="stocked">已入库</option>
+              <option value="available">可售</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="sec-title">尺寸 · 交付</p>
+        <div class="dim-row">
+          <label class="field"><span>长 L (mm)</span><input id="eLength" type="number" placeholder="0"></label>
+          <label class="field"><span>宽 W (mm)</span><input id="eWidth" type="number" placeholder="0"></label>
+          <label class="field"><span>高 H (mm)</span><input id="eHeight" type="number" placeholder="0"></label>
+        </div>
+        <div class="form-grid" style="margin-top:14px">
+          <label class="field"><span>数量</span><input id="eQuantity" type="number" min="1" value="1"></label>
+          <label class="field"><span>交期 / 入库时间</span><input id="eStockDate" type="date"></label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="sec-title">销售信息</p>
+        <div class="form-grid">
+          <label class="field"><span>价格（元）</span><input id="ePrice" type="number" min="0" placeholder="留空表示面议"></label>
+          <label class="field"><span>卖点标签</span><input id="eHighlights" placeholder="逗号分隔，如：内置喇叭, 视频屏"><span class="hint">用逗号「,」分隔多个卖点</span></label>
+          <label class="field full"><span>外观图</span>
+            <div class="upload-box">
+              <div class="f-info"><div class="f-name" id="eCoverName">未上传</div><div class="f-hint">JPG / PNG，建议横向 3:2</div></div>
+              <label>上传<input type="file" accept="image/*" onchange="app.onCoverUpload(event)"></label>
+              <button class="rm" onclick="app.removeCover()" title="移除">×</button>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <p class="sec-title">设计信息</p>
+        <div class="form-grid">
+          <label class="field"><span>材质 / 工艺</span><input id="eMaterial" placeholder="例如 实木贴皮 + 亚克力灯箱"></label>
+          <label class="field"><span>设计负责人</span><input id="eDesigner" placeholder="例如 方镱静"></label>
+          <label class="field full"><span>画面文件（仅 AI）</span>
+            <div class="upload-box">
+              <div class="f-info"><div class="f-name" id="eArtworkName">未上传</div><div class="f-hint">仅接受 .ai 格式</div></div>
+              <label>上传<input type="file" accept=".ai,application/postscript" onchange="app.onFileUpload('artwork', event)"></label>
+              <button class="rm" onclick="app.removeFile('artwork')" title="移除">×</button>
+            </div>
+          </label>
+          <label class="field full"><span>尺寸图纸（仅 PDF）</span>
+            <div class="upload-box">
+              <div class="f-info"><div class="f-name" id="eDrawingName">未上传</div><div class="f-hint">仅接受 .pdf 格式</div></div>
+              <label>上传<input type="file" accept=".pdf,application/pdf" onchange="app.onFileUpload('drawing', event)"></label>
+              <button class="rm" onclick="app.removeFile('drawing')" title="移除">×</button>
+            </div>
+          </label>
+          <label class="field full"><span>制作备注</span><textarea id="eNote" placeholder="工艺、安装、包装等补充要求"></textarea></label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="text-danger left" id="modalDelete" style="display:none; border:0; background:transparent; color:#a04e3f; font-size:12px" onclick="app.deleteCurrent()">删除这张展桌</button>
+      <span></span>
+      <div style="display:flex; gap:10px">
+        <button class="button ghost" onclick="app.closeEditor()">取消</button>
+        <button class="button primary" onclick="app.saveEditor()">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'expo_table_db_v1';
+const MAX_FILE_SIZE = 8 * 1024 * 1024;
+
+const STATUS_META = {
+  designing:  { label: '设计稿中', color: '#8a6d3b', bg: '#fff3d8' },
+  review:     { label: '待确认',   color: '#95621d', bg: '#fff3d8' },
+  producing:  { label: '制作中',   color: '#1d59a0', bg: '#e3eefa' },
+  stocked:    { label: '已入库',   color: '#246544', bg: '#e2f3e8' },
+  available:  { label: '可售',     color: '#1d593b', bg: '#d9f2e4' },
+};
+
+let items = [];
+let currentView = 'sales';
+let filterText = '';
+let editingId = null;
+let editingItem = null;
+let draftCover = null; // dataURL
+
+function uuid() {
+  return crypto.randomUUID ? crypto.randomUUID() :
+    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      const r = Math.random() * 16 | 0;
+      return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+}
+
+function emptyTable() {
+  return {
+    id: uuid(), partNo: '', name: '', model: '', quantity: 1, stockDate: '',
+    length: '', width: '', height: '', price: '', highlights: [],
+    material: '', designer: '', status: 'designing',
+    cover: null, artwork: null, drawing: null, note: ''
+  };
+}
+
+function fmtPrice(p) {
+  if (p === '' || p === null || p === undefined) return '面议';
+  return '¥' + Number(p).toLocaleString('zh-CN');
+}
+
+function fmtSize(it) {
+  const l = it.length || '—', w = it.width || '—', h = it.height || '—';
+  return `${l} × ${w} × ${h} mm`;
+}
+
+const app = {
+  init() {
+    this.load();
+    if (!items.length) this.seed();
+    // hash routing
+    const h = location.hash.replace('#', '');
+    if (h === 'design' || h === 'sales') currentView = h;
+    this.render();
+  },
+
+  load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) items = JSON.parse(raw);
+    } catch(e) { items = []; }
+  },
+
+  save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    } catch(e) {
+      if (e.name === 'QuotaExceededError') this.toast('存储空间不足，请删除部分文件');
+    }
+    this.render();
+  },
+
+  seed() {
+    const t1 = emptyTable();
+    t1.partNo = 'ZT-001'; t1.name = '日本yodo仙台展桌'; t1.model = 'YD-2026';
+    t1.quantity = 1; t1.stockDate = '2026-07-31';
+    t1.length = '1800'; t1.width = '800'; t1.height = '750';
+    t1.price = ''; t1.highlights = ['内置发声喇叭', '视频展示屏', '首次制作'];
+    t1.material = '实木贴皮 + 亚克力灯箱'; t1.designer = '方镱静'; t1.status = 'producing';
+    t1.note = '桌角做圆角处理；发声喇叭需预留走线孔位。';
+    t1.artwork = null; t1.drawing = null;
+
+    const t2 = emptyTable();
+    t2.partNo = 'ZT-002'; t2.name = '迪拜展会展桌'; t2.model = 'DBX-01';
+    t2.quantity = 2; t2.stockDate = '2026-09-10';
+    t2.length = '1500'; t2.width = '700'; t2.height = '900';
+    t2.price = '26800'; t2.highlights = ['可折叠便携', 'LED 背光'];
+    t2.material = '铝合金框架 + 玻璃面板'; t2.designer = '方镱静'; t2.status = 'available';
+    t2.note = '需配航空运输箱。';
+
+    const t3 = emptyTable();
+    t3.partNo = 'ZT-003'; t3.name = '新加坡展桌'; t3.model = 'SGP-03';
+    t3.quantity = 1; t3.stockDate = '2026-08-20';
+    t3.length = '1200'; t3.width = '600'; t3.height = '1050';
+    t3.price = '19800'; t3.highlights = ['简约白色', '隐藏线槽'];
+    t3.material = '烤漆中纤板'; t3.designer = '方镱静'; t3.status = 'designing';
+    t3.note = '';
+
+    items = [t1, t2, t3];
+    this.save();
+  },
+
+  switchView(v) {
+    currentView = v;
+    history.replaceState(null, '', '#' + v);
+    this.render();
+  },
+
+  filter() {
+    filterText = document.getElementById('searchInput').value;
+    this.renderGrid();
+  },
+
+  render() {
+    const isSales = currentView === 'sales';
+    // nav
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === currentView));
+    document.getElementById('viewTitle').textContent = isSales ? '销售端' : '设计端';
+    document.getElementById('viewTag').textContent = isSales ? 'SALES' : 'DESIGN';
+    document.getElementById('viewEyebrow').textContent = isSales ? 'SALES VIEW · 客户视角' : 'DESIGN VIEW · 制作视角';
+    document.getElementById('viewHeading').textContent = isSales ? '面向销售的展桌信息' : '面向设计的展桌信息';
+    document.getElementById('viewDesc').textContent = isSales
+      ? '价格、外观、交期与卖点，快速向客户介绍每一张展桌。'
+      : '料号、尺寸、文件与工艺，聚焦制作与交付细节。';
+
+    document.getElementById('navCountSales').textContent = items.length;
+    document.getElementById('navCountDesign').textContent = items.length;
+    document.getElementById('footTotal').textContent = '共 ' + items.length + ' 张展桌';
+
+    this.renderStats();
+    this.renderGrid();
+  },
+
+  renderStats() {
+    document.getElementById('statTotal').textContent = items.length;
+    document.getElementById('statAvailable').textContent = items.filter(i => i.status === 'available').length;
+    document.getElementById('statStocking').textContent = items.filter(i => i.status === 'producing').length;
+  },
+
+  filtered() {
+    return items.filter(i =>
+      `${i.partNo}${i.name}${i.model}`.toLowerCase().includes(filterText.toLowerCase())
+    );
+  },
+
+  renderGrid() {
+    const grid = document.getElementById('cardGrid');
+    const list = this.filtered();
+    if (!list.length) {
+      grid.innerHTML = `<div class="empty-state"><div class="glyph">🗂️</div><p>${items.length ? '没有匹配的展桌' : '还没有展桌记录'}</p><button class="button primary" onclick="app.openEditor()">＋ 新增展桌</button></div>`;
+      return;
+    }
+    const isSales = currentView === 'sales';
+    grid.innerHTML = list.map(it => isSales ? this.salesCard(it) : this.designCard(it)).join('');
+  },
+
+  salesCard(it) {
+    const st = STATUS_META[it.status] || STATUS_META.designing;
+    const cover = it.cover
+      ? `<img src="${it.cover}" alt="">`
+      : `<div class="cover-fallback"><span class="glyph">🖼️</span><span>暂无外观图</span></div>`;
+    const hl = (it.highlights || []).filter(Boolean);
+    return `
+      <article class="card" onclick="app.openEditor('${it.id}')">
+        <div class="card-cover">${cover}</div>
+        <span class="status-pill" style="color:${st.color};background:${st.bg}">${st.label}</span>
+        <div class="card-body">
+          <span class="card-no">${it.partNo || '待填写料号'}</span>
+          <h3>${it.name || '未命名展桌'}</h3>
+          ${it.model ? `<span class="model">${it.model}</span>` : ''}
+          <div class="info-rows">
+            <div class="info-row"><span class="k">尺寸</span><span class="v">${fmtSize(it)}</span></div>
+            <div class="info-row"><span class="k">数量</span><span class="v">${it.quantity} 张</span></div>
+            <div class="info-row"><span class="k">交期</span><span class="v">${it.stockDate || '待定'}</span></div>
+            <div class="info-row"><span class="k">价格</span><span class="v price">${fmtPrice(it.price)}</span></div>
+          </div>
+          ${hl.length ? `<div class="tag-row">${hl.map(h => `<span class="chip hl">${h}</span>`).join('')}</div>` : ''}
+        </div>
+        <div class="card-foot"><span>${it.designer ? '设计 · ' + it.designer : ''}</span><span>点击查看详情</span></div>
+      </article>`;
+  },
+
+  designCard(it) {
+    const st = STATUS_META[it.status] || STATUS_META.designing;
+    const fmts = [];
+    if (it.artwork) fmts.push('AI');
+    if (it.drawing) fmts.push('PDF');
+    return `
+      <article class="card" onclick="app.openEditor('${it.id}')">
+        <span class="status-pill" style="color:${st.color};background:${st.bg}">${st.label}</span>
+        <div class="card-body">
+          <span class="card-no">${it.partNo || '待填写料号'}</span>
+          <h3>${it.name || '未命名展桌'}</h3>
+          ${it.model ? `<span class="model">${it.model}</span>` : ''}
+          <div class="info-rows">
+            <div class="info-row"><span class="k">尺寸</span><span class="v">${fmtSize(it)}</span></div>
+            <div class="info-row"><span class="k">数量</span><span class="v">${it.quantity} 张</span></div>
+            <div class="info-row"><span class="k">入库</span><span class="v">${it.stockDate || '待定'}</span></div>
+            ${it.material ? `<div class="info-row"><span class="k">材质</span><span class="v">${it.material}</span></div>` : ''}
+          </div>
+          ${fmts.length ? `<div class="tag-row">${fmts.map(f => `<span class="chip fmt">${f}</span>`).join('')}</div>` : ''}
+          <div class="file-row">
+            ${this.fileLink('画面文件', it.artwork, 'AI', 'artwork')}
+            ${this.fileLink('尺寸图纸', it.drawing, 'PDF', 'drawing')}
+          </div>
+          ${it.note ? `<div class="card-note">${it.note}</div>` : ''}
+        </div>
+        <div class="card-foot">
+          <span class="owner"><span class="avatar">${(it.designer || '设').charAt(0)}</span>${it.designer || '未分配'}</span>
+          <span>点击查看详情</span>
+        </div>
+      </article>`;
+  },
+
+  fileLink(label, file, ext, kind) {
+    if (file) {
+      const durl = file.dataUrl || '#';
+      return `<a class="file-link" href="${durl}" download="${file.name}" onclick="event.stopPropagation()"><span class="fext">${ext}</span><span class="fname">${label} · ${file.name}</span></a>`;
+    }
+    return `<span class="file-link missing" onclick="event.stopPropagation()"><span class="fext">${ext}</span><span class="fname">${label} · 未上传</span></span>`;
+  },
+
+  /* ===== Editor ===== */
+  openEditor(id) {
+    editingId = id || null;
+    const it = id ? items.find(x => x.id === id) : emptyTable();
+    editingItem = it;
+    draftCover = null;
+
+    document.getElementById('modalTitle').textContent = id ? '编辑展桌' : '新增展桌';
+    document.getElementById('ePartNo').value = it.partNo || '';
+    document.getElementById('eName').value = it.name || '';
+    document.getElementById('eModel').value = it.model || '';
+    document.getElementById('eStatus').value = it.status || 'designing';
+    document.getElementById('eLength').value = it.length || '';
+    document.getElementById('eWidth').value = it.width || '';
+    document.getElementById('eHeight').value = it.height || '';
+    document.getElementById('eQuantity').value = it.quantity || 1;
+    document.getElementById('eStockDate').value = it.stockDate || '';
+    document.getElementById('ePrice').value = it.price ?? '';
+    document.getElementById('eHighlights').value = (it.highlights || []).join(', ');
+    document.getElementById('eMaterial').value = it.material || '';
+    document.getElementById('eDesigner').value = it.designer || '';
+    document.getElementById('eNote').value = it.note || '';
+
+    this.renderCoverName();
+    document.getElementById('eArtworkName').textContent = it.artwork ? it.artwork.name : '未上传';
+    document.getElementById('eDrawingName').textContent = it.drawing ? it.drawing.name : '未上传';
+
+    document.getElementById('modalDelete').style.display = id ? '' : 'none';
+    document.getElementById('modalMask').classList.add('show');
+  },
+
+  closeEditor() {
+    document.getElementById('modalMask').classList.remove('show');
+    editingId = null;
+    editingItem = null;
+    draftCover = null;
+  },
+
+  saveEditor() {
+    const it = editingItem || emptyTable();
+    const isNew = !editingId;
+    it.partNo = document.getElementById('ePartNo').value.trim();
+    it.name = document.getElementById('eName').value.trim();
+    it.model = document.getElementById('eModel').value.trim();
+    it.status = document.getElementById('eStatus').value;
+    it.length = document.getElementById('eLength').value;
+    it.width = document.getElementById('eWidth').value;
+    it.height = document.getElementById('eHeight').value;
+    it.quantity = parseInt(document.getElementById('eQuantity').value) || 1;
+    it.stockDate = document.getElementById('eStockDate').value;
+    it.price = document.getElementById('ePrice').value;
+    it.highlights = document.getElementById('eHighlights').value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
+    it.material = document.getElementById('eMaterial').value.trim();
+    it.designer = document.getElementById('eDesigner').value.trim();
+    it.note = document.getElementById('eNote').value.trim();
+
+    if (draftCover === '__remove__') it.cover = null;
+    else if (draftCover) it.cover = draftCover;
+
+    if (isNew) items.push(it);
+
+    this.save();
+    this.closeEditor();
+    this.toast(isNew ? '已新增展桌' : '已保存修改');
+  },
+
+  deleteCurrent() {
+    if (!editingId) return;
+    const it = items.find(x => x.id === editingId);
+    if (!confirm(`确定删除「${it.name || '未命名展桌'}」吗？`)) return;
+    items = items.filter(x => x.id !== editingId);
+    this.save();
+    this.closeEditor();
+    this.toast('已删除');
+  },
+
+  onCoverUpload(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (file.size > MAX_FILE_SIZE) { this.toast('图片超过 8MB，请压缩'); return; }
+    const reader = new FileReader();
+    reader.onload = () => { draftCover = reader.result; this.renderCoverName(); };
+    reader.readAsDataURL(file);
+  },
+
+  removeCover() {
+    draftCover = '__remove__';
+    this.renderCoverName();
+  },
+
+  renderCoverName() {
+    const el = document.getElementById('eCoverName');
+    const it = editingItem;
+    if (draftCover === '__remove__') el.textContent = '未上传（保存后移除）';
+    else if (draftCover) el.textContent = '已上传新图片';
+    else if (it && it.cover) el.textContent = '已上传图片';
+    else el.textContent = '未上传';
+  },
+
+  onFileUpload(kind, event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (kind === 'artwork' && ext !== '.ai' && file.type !== 'application/postscript') {
+      this.toast('画面文件只接受 AI 格式'); event.target.value = ''; return;
+    }
+    if (kind === 'drawing' && ext !== '.pdf' && file.type !== 'application/pdf') {
+      this.toast('尺寸图纸只接受 PDF 格式'); event.target.value = ''; return;
+    }
+    if (file.size > MAX_FILE_SIZE) { this.toast('文件超过 8MB'); return; }
+    const it = editingItem;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const data = { name: file.name, dataUrl: reader.result, size: file.size, type: file.type };
+      if (it) { it[kind] = data; if (editingId) this.save(); }
+      // keep name label in sync
+      document.getElementById(kind === 'artwork' ? 'eArtworkName' : 'eDrawingName').textContent = file.name;
+      this.toast('已上传：' + file.name);
+    };
+    reader.readAsDataURL(file);
+  },
+
+  removeFile(kind) {
+    const it = editingItem;
+    if (it) { it[kind] = null; if (editingId) this.save(); }
+    document.getElementById(kind === 'artwork' ? 'eArtworkName' : 'eDrawingName').textContent = '未上传';
+  },
+
+  toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 2000);
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => app.init());
+</script>
+</body>
+</html>
