@@ -150,6 +150,23 @@ img { display: block; max-width: 100%; }
 .view-stats strong { font-size: 22px; line-height: 1; }
 .view-stats span { color: var(--muted); font-size: 11px; margin-top: 6px; }
 
+/* ===== Filter Bar ===== */
+.filter-bar {
+  display: flex; align-items: center; gap: 28px; flex-wrap: wrap;
+  margin-bottom: 22px; padding: 14px 18px;
+  background: var(--white); border: 1px solid var(--line); border-radius: 8px;
+}
+.filter-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.filter-label { color: var(--muted); font-size: 12px; font-weight: 700; margin-right: 2px; }
+.filter-chip {
+  border: 1px solid var(--line); background: #fafaf7;
+  color: #4a524c; font-size: 12px; font-weight: 600;
+  padding: 7px 14px; border-radius: 20px;
+  transition: background .2s, color .2s, border-color .2s;
+}
+.filter-chip:hover { border-color: var(--green); color: var(--green); }
+.filter-chip.active { background: var(--green); border-color: var(--green); color: #fff; }
+
 /* ===== Card Grid ===== */
 .card-grid {
   display: grid;
@@ -408,6 +425,21 @@ img { display: block; max-width: 100%; }
           <div><strong id="statStocking">0</strong><span>制作中</span></div>
         </div>
       </div>
+      <div class="filter-bar" id="filterBar">
+        <div class="filter-group">
+          <span class="filter-label">展桌类型</span>
+          <button class="filter-chip active" data-group="tableType" data-value="all" onclick="app.setFilter('tableType','all')">全部</button>
+          <button class="filter-chip" data-group="tableType" data-value="island" onclick="app.setFilter('tableType','island')">中岛</button>
+          <button class="filter-chip" data-group="tableType" data-value="endcap" onclick="app.setFilter('tableType','endcap')">端头</button>
+        </div>
+        <div class="filter-group">
+          <span class="filter-label">画面类型</span>
+          <button class="filter-chip active" data-group="artworkType" data-value="all" onclick="app.setFilter('artworkType','all')">全部</button>
+          <button class="filter-chip" data-group="artworkType" data-value="none" onclick="app.setFilter('artworkType','none')">无背板</button>
+          <button class="filter-chip" data-group="artworkType" data-value="lightbox" onclick="app.setFilter('artworkType','lightbox')">灯片</button>
+          <button class="filter-chip" data-group="artworkType" data-value="video" onclick="app.setFilter('artworkType','video')">视频</button>
+        </div>
+      </div>
       <div class="card-grid" id="cardGrid"></div>
     </div>
   </div>
@@ -434,6 +466,19 @@ img { display: block; max-width: 100%; }
               <option value="producing">制作中</option>
               <option value="stocked">已入库</option>
               <option value="available">可售</option>
+            </select>
+          </label>
+          <label class="field"><span>展桌类型</span>
+            <select id="eTableType">
+              <option value="island">中岛</option>
+              <option value="endcap">端头</option>
+            </select>
+          </label>
+          <label class="field"><span>画面类型</span>
+            <select id="eArtworkType">
+              <option value="none">无背板</option>
+              <option value="lightbox">灯片</option>
+              <option value="video">视频</option>
             </select>
           </label>
         </div>
@@ -515,9 +560,21 @@ const STATUS_META = {
   available:  { label: '可售',     color: '#1d593b', bg: '#d9f2e4' },
 };
 
+const TABLE_TYPE_META = {
+  island: '中岛',
+  endcap: '端头',
+};
+const ARTWORK_TYPE_META = {
+  none: '无背板',
+  lightbox: '灯片',
+  video: '视频',
+};
+
 let items = [];
 let currentView = 'sales';
 let filterText = '';
+let filterTableType = 'all';
+let filterArtworkType = 'all';
 let editingId = null;
 let editingItem = null;
 let draftCover = null; // dataURL
@@ -534,6 +591,7 @@ function emptyTable() {
   return {
     id: uuid(), partNo: '', name: '', model: '', quantity: 1, stockDate: '',
     length: '', width: '', height: '', price: '', highlights: [],
+    tableType: 'island', artworkType: 'none',
     material: '', designer: '', status: 'designing',
     cover: null, artwork: null, drawing: null, note: ''
   };
@@ -562,7 +620,14 @@ const app = {
   load() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) items = JSON.parse(raw);
+      if (raw) {
+        items = JSON.parse(raw);
+        // migrate: ensure type fields exist on older records
+        items.forEach(i => {
+          if (!i.tableType) i.tableType = 'island';
+          if (!i.artworkType) i.artworkType = 'none';
+        });
+      }
     } catch(e) { items = []; }
   },
 
@@ -582,6 +647,7 @@ const app = {
     t1.length = '1800'; t1.width = '800'; t1.height = '750';
     t1.price = ''; t1.highlights = ['内置发声喇叭', '视频展示屏', '首次制作'];
     t1.material = '实木贴皮 + 亚克力灯箱'; t1.designer = '方镱静'; t1.status = 'producing';
+    t1.tableType = 'island'; t1.artworkType = 'video';
     t1.note = '桌角做圆角处理；发声喇叭需预留走线孔位。';
     t1.artwork = null; t1.drawing = null;
 
@@ -591,6 +657,7 @@ const app = {
     t2.length = '1500'; t2.width = '700'; t2.height = '900';
     t2.price = '26800'; t2.highlights = ['可折叠便携', 'LED 背光'];
     t2.material = '铝合金框架 + 玻璃面板'; t2.designer = '方镱静'; t2.status = 'available';
+    t2.tableType = 'endcap'; t2.artworkType = 'lightbox';
     t2.note = '需配航空运输箱。';
 
     const t3 = emptyTable();
@@ -599,6 +666,7 @@ const app = {
     t3.length = '1200'; t3.width = '600'; t3.height = '1050';
     t3.price = '19800'; t3.highlights = ['简约白色', '隐藏线槽'];
     t3.material = '烤漆中纤板'; t3.designer = '方镱静'; t3.status = 'designing';
+    t3.tableType = 'island'; t3.artworkType = 'none';
     t3.note = '';
 
     items = [t1, t2, t3];
@@ -616,6 +684,22 @@ const app = {
     this.renderGrid();
   },
 
+  setFilter(group, value) {
+    if (group === 'tableType') filterTableType = value;
+    else if (group === 'artworkType') filterArtworkType = value;
+    this.renderFilterBar();
+    this.renderGrid();
+  },
+
+  renderFilterBar() {
+    document.querySelectorAll('.filter-chip').forEach(btn => {
+      const g = btn.dataset.group;
+      const v = btn.dataset.value;
+      const cur = g === 'tableType' ? filterTableType : filterArtworkType;
+      btn.classList.toggle('active', v === cur);
+    });
+  },
+
   render() {
     const isSales = currentView === 'sales';
     // nav
@@ -626,6 +710,9 @@ const app = {
     document.getElementById('viewDesc').textContent = isSales
       ? '价格、外观、交期与卖点，快速向客户介绍每一张展桌。'
       : '料号、尺寸、文件与工艺，聚焦制作与交付细节。';
+
+    // filter bar only on design view
+    document.getElementById('filterBar').style.display = isSales ? 'none' : 'flex';
 
     document.getElementById('navCountSales').textContent = items.length;
     document.getElementById('navCountDesign').textContent = items.length;
@@ -642,9 +729,12 @@ const app = {
   },
 
   filtered() {
-    return items.filter(i =>
-      `${i.partNo}${i.name}${i.model}`.toLowerCase().includes(filterText.toLowerCase())
-    );
+    return items.filter(i => {
+      const textMatch = `${i.partNo}${i.name}${i.model}`.toLowerCase().includes(filterText.toLowerCase());
+      const typeMatch = filterTableType === 'all' || i.tableType === filterTableType;
+      const artMatch = filterArtworkType === 'all' || i.artworkType === filterArtworkType;
+      return textMatch && typeMatch && artMatch;
+    });
   },
 
   renderGrid() {
@@ -689,11 +779,17 @@ const app = {
     const fmts = [];
     if (it.artwork) fmts.push('AI');
     if (it.drawing) fmts.push('PDF');
+    const typeLabel = TABLE_TYPE_META[it.tableType] || '中岛';
+    const artLabel = ARTWORK_TYPE_META[it.artworkType] || '无背板';
     return `
       <article class="card" onclick="app.openEditor('${it.id}')">
         <span class="status-pill" style="color:${st.color};background:${st.bg}">${st.label}</span>
         <div class="card-body">
           <span class="card-no">${it.partNo || '待填写料号'}</span>
+          <div class="tag-row">
+            <span class="chip fmt">${typeLabel}</span>
+            <span class="chip fmt">${artLabel}</span>
+          </div>
           <h3>${it.name || '未命名展桌'}</h3>
           ${it.model ? `<span class="model">${it.model}</span>` : ''}
           <div class="info-rows">
@@ -736,6 +832,8 @@ const app = {
     document.getElementById('eName').value = it.name || '';
     document.getElementById('eModel').value = it.model || '';
     document.getElementById('eStatus').value = it.status || 'designing';
+    document.getElementById('eTableType').value = it.tableType || 'island';
+    document.getElementById('eArtworkType').value = it.artworkType || 'none';
     document.getElementById('eLength').value = it.length || '';
     document.getElementById('eWidth').value = it.width || '';
     document.getElementById('eHeight').value = it.height || '';
@@ -769,6 +867,8 @@ const app = {
     it.name = document.getElementById('eName').value.trim();
     it.model = document.getElementById('eModel').value.trim();
     it.status = document.getElementById('eStatus').value;
+    it.tableType = document.getElementById('eTableType').value;
+    it.artworkType = document.getElementById('eArtworkType').value;
     it.length = document.getElementById('eLength').value;
     it.width = document.getElementById('eWidth').value;
     it.height = document.getElementById('eHeight').value;
