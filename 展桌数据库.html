@@ -595,7 +595,7 @@ img { display: block; max-width: 100%; }
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'expo_table_db_v1';
+const STORAGE_KEY = 'expo_table_db_v2';
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
 const STATUS_META = {
@@ -693,37 +693,28 @@ const app = {
 
   seed() {
     const t1 = emptyTable();
-    t1.partNo = 'ZT-001'; t1.name = '日本yodo仙台展桌'; t1.model = 'YD-2026';
-    t1.quantity = 1; t1.stockDate = '2026-07-31';
-    t1.length = '1800'; t1.width = '800'; t1.height = '750';
-    t1.price = ''; t1.highlights = ['内置发声喇叭', '视频展示屏', '首次制作'];
-    t1.material = '实木贴皮 + 亚克力灯箱'; t1.designer = '方镱静'; t1.status = 'producing';
-    t1.tableType = 'island'; t1.artworkType = 'video';
-    t1.grossWeight = '58'; t1.netWeight = '52'; t1.packSize = 'L1850*W850*H800mm'; t1.cost = '24000';
-    t1.note = '桌角做圆角处理；发声喇叭需预留走线孔位。';
+    t1.partNo = 'ZT-001'; t1.name = '中岛展桌'; t1.model = '';
+    t1.quantity = 1; t1.stockDate = '';
+    t1.length = '1800'; t1.width = '1000'; t1.height = '1400';
+    t1.price = ''; t1.highlights = [];
+    t1.material = '铁'; t1.designer = ''; t1.status = 'available';
+    t1.tableType = 'island'; t1.artworkType = 'none';
+    t1.grossWeight = '279'; t1.netWeight = '165'; t1.packSize = 'L1885*W1080*H1590mm'; t1.cost = '15000';
+    t1.note = '';
     t1.artwork = null; t1.drawing = null;
 
     const t2 = emptyTable();
-    t2.partNo = 'ZT-002'; t2.name = '迪拜展会展桌'; t2.model = 'DBX-01';
-    t2.quantity = 2; t2.stockDate = '2026-09-10';
-    t2.length = '1500'; t2.width = '700'; t2.height = '900';
-    t2.price = '26800'; t2.highlights = ['可折叠便携', 'LED 背光'];
-    t2.material = '铝合金框架 + 玻璃面板'; t2.designer = '方镱静'; t2.status = 'available';
-    t2.tableType = 'endcap'; t2.artworkType = 'lightbox';
-    t2.grossWeight = '45'; t2.netWeight = '40'; t2.packSize = 'L1550*W750*H950mm'; t2.cost = '18000';
-    t2.note = '需配航空运输箱。';
+    t2.partNo = 'ZT-002'; t2.name = '端头展桌'; t2.model = '';
+    t2.quantity = 1; t2.stockDate = '';
+    t2.length = '1800'; t2.width = '1000'; t2.height = '1400';
+    t2.price = ''; t2.highlights = [];
+    t2.material = '铁'; t2.designer = ''; t2.status = 'available';
+    t2.tableType = 'endcap'; t2.artworkType = 'none';
+    t2.grossWeight = '279'; t2.netWeight = '165'; t2.packSize = 'L1885*W1080*H1590mm'; t2.cost = '15000';
+    t2.note = '';
+    t2.artwork = null; t2.drawing = null;
 
-    const t3 = emptyTable();
-    t3.partNo = 'ZT-003'; t3.name = '新加坡展桌'; t3.model = 'SGP-03';
-    t3.quantity = 1; t3.stockDate = '2026-08-20';
-    t3.length = '1200'; t3.width = '600'; t3.height = '1050';
-    t3.price = '19800'; t3.highlights = ['简约白色', '隐藏线槽'];
-    t3.material = '烤漆中纤板'; t3.designer = '方镱静'; t3.status = 'designing';
-    t3.tableType = 'island'; t3.artworkType = 'none';
-    t3.grossWeight = '35'; t3.netWeight = '30'; t3.packSize = 'L1250*W650*H1100mm'; t3.cost = '12000';
-    t3.note = '';
-
-    items = [t1, t2, t3];
+    items = [t1, t2];
     this.save();
   },
 
