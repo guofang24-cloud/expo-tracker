@@ -296,15 +296,6 @@ img { display: block; max-width: 100%; }
 .spec-row .k { color: var(--muted); font-size: 11px; min-width: 58px; flex-shrink: 0; }
 .spec-row .v { font-weight: 600; }
 .spec-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 18px 0; }
-.spec-foot {
-  margin-top: auto; padding: 12px 18px;
-  border-top: 1px solid #ecefea;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.spec-foot .price { color: var(--orange); font-size: 18px; font-weight: 800; }
-.spec-foot .status {
-  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px;
-}
 
 /* Empty state */
 .empty-state {
@@ -595,7 +586,7 @@ img { display: block; max-width: 100%; }
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'expo_table_db_v2';
+const STORAGE_KEY = 'expo_table_db_v3';
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
 const STATUS_META = {
@@ -701,6 +692,7 @@ const app = {
     t1.tableType = 'island'; t1.artworkType = 'none';
     t1.grossWeight = '279'; t1.netWeight = '165'; t1.packSize = 'L1885*W1080*H1590mm'; t1.cost = '15000';
     t1.note = '';
+    t1.cover = 'images/zhongdao.jpg';
     t1.artwork = null; t1.drawing = null;
 
     const t2 = emptyTable();
@@ -712,6 +704,7 @@ const app = {
     t2.tableType = 'endcap'; t2.artworkType = 'none';
     t2.grossWeight = '279'; t2.netWeight = '165'; t2.packSize = 'L1885*W1080*H1590mm'; t2.cost = '15000';
     t2.note = '';
+    t2.cover = 'images/duantou.jpg';
     t2.artwork = null; t2.drawing = null;
 
     items = [t1, t2];
@@ -794,7 +787,6 @@ const app = {
   },
 
   salesCard(it) {
-    const st = STATUS_META[it.status] || STATUS_META.designing;
     const typeLabel = TABLE_TYPE_META[it.tableType] || '中岛';
     const artLabel = ARTWORK_TYPE_META[it.artworkType] || '无背板';
     const cover = it.cover
@@ -820,10 +812,6 @@ const app = {
           <div class="spec-row"><span class="k">成本</span><span class="v">${costText}</span></div>
         </div>
         ${hl.length ? `<div class="spec-tags">${hl.map(h => `<span class="chip hl">${h}</span>`).join('')}</div>` : ''}
-        <div class="spec-foot">
-          <span class="price">${fmtPrice(it.price)}</span>
-          <span class="status" style="color:${st.color};background:${st.bg}">${st.label}</span>
-        </div>
       </article>`;
   },
 
