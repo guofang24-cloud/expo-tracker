@@ -297,6 +297,68 @@ img { display: block; max-width: 100%; }
 .spec-row .v { font-weight: 600; }
 .spec-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 18px 0; }
 
+/* ===== Design table view (参考定制缩略表) ===== */
+.design-table-wrap {
+  background: var(--white);
+  border: 1px solid #a8a8a8;
+  overflow-x: auto;
+}
+.design-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.design-table th {
+  background: #edf0ee;
+  font-weight: 700;
+  text-align: left;
+  padding: 12px 16px;
+  border: 1px solid #a8a8a8;
+  color: var(--ink);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.design-table td {
+  padding: 12px 16px;
+  border: 1px solid #a8a8a8;
+  color: var(--ink);
+  vertical-align: top;
+}
+.design-table th.col-type, .design-table td.col-type { width: 14%; }
+.design-table th.col-art, .design-table td.col-art { width: 12%; }
+.design-table th.col-size, .design-table td.col-size { width: 34%; }
+.design-table th.col-spec, .design-table td.col-spec { width: 14%; }
+.design-table th.col-op, .design-table td.col-op { width: 16%; }
+.design-table tbody tr.data-row { cursor: pointer; }
+.design-table tbody tr.data-row:hover { background: #f4f8e8; }
+.detail-link {
+  color: #699629;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  border: none; background: transparent; padding: 0; font-size: 13px;
+}
+.detail-link:hover { text-decoration: underline; }
+
+.detail-row > td { background: #fbfcfa; padding: 0; }
+.detail-panel {
+  padding: 16px 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+}
+.detail-item { display: flex; flex-direction: column; gap: 3px; }
+.detail-item .k { color: var(--muted); font-size: 11px; }
+.detail-item .v { font-weight: 600; font-size: 13px; }
+.detail-note {
+  grid-column: 1 / -1;
+  font-size: 12px; color: var(--muted);
+  background: #f4f5f2; padding: 10px 12px;
+  border-left: 3px solid var(--line);
+}
+.detail-actions { grid-column: 1 / -1; display: flex; gap: 10px; margin-top: 2px; }
+.detail-actions .button { min-height: 34px; padding: 0 14px; font-size: 12px; }
+
 /* Empty state */
 .empty-state {
   grid-column: 1 / -1;
@@ -514,6 +576,7 @@ img { display: block; max-width: 100%; }
               <option value="video">视频</option>
             </select>
           </label>
+          <label class="field"><span>规格</span><input id="eSpec" placeholder="例如 韩规 / 英规"></label>
         </div>
       </div>
 
@@ -586,7 +649,7 @@ img { display: block; max-width: 100%; }
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'expo_table_db_v3';
+const STORAGE_KEY = 'expo_table_db_v4';
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
 const STATUS_META = {
@@ -628,21 +691,11 @@ function emptyTable() {
   return {
     id: uuid(), partNo: '', name: '', model: '', quantity: 1, stockDate: '',
     length: '', width: '', height: '', price: '', highlights: [],
-    tableType: 'island', artworkType: 'none',
+    tableType: 'island', artworkType: 'none', spec: '',
     material: '', designer: '', status: 'designing',
     grossWeight: '', netWeight: '', packSize: '', cost: '',
     cover: null, artwork: null, drawing: null, note: ''
   };
-}
-
-function fmtPrice(p) {
-  if (p === '' || p === null || p === undefined) return '面议';
-  return '¥' + Number(p).toLocaleString('zh-CN');
-}
-
-function fmtSize(it) {
-  const l = it.length || '—', w = it.width || '—', h = it.height || '—';
-  return `${l} × ${w} × ${h} mm`;
 }
 
 const app = {
@@ -664,6 +717,7 @@ const app = {
         items.forEach(i => {
           if (!i.tableType) i.tableType = 'island';
           if (!i.artworkType) i.artworkType = 'none';
+          if (!i.spec) i.spec = '';
           if (!i.grossWeight) i.grossWeight = '';
           if (!i.netWeight) i.netWeight = '';
           if (!i.packSize) i.packSize = '';
@@ -689,7 +743,7 @@ const app = {
     t1.length = '1800'; t1.width = '1000'; t1.height = '1400';
     t1.price = ''; t1.highlights = [];
     t1.material = '铁'; t1.designer = ''; t1.status = 'available';
-    t1.tableType = 'island'; t1.artworkType = 'none';
+    t1.tableType = 'island'; t1.artworkType = 'lightbox'; t1.spec = '韩规';
     t1.grossWeight = '279'; t1.netWeight = '165'; t1.packSize = 'L1885*W1080*H1590mm'; t1.cost = '15000';
     t1.note = '';
     t1.cover = 'images/zhongdao.jpg';
@@ -698,11 +752,11 @@ const app = {
     const t2 = emptyTable();
     t2.partNo = 'ZT-002'; t2.name = '端头展桌'; t2.model = '';
     t2.quantity = 1; t2.stockDate = '';
-    t2.length = '1800'; t2.width = '1000'; t2.height = '1400';
+    t2.length = '900'; t2.width = '400'; t2.height = '1400';
     t2.price = ''; t2.highlights = [];
     t2.material = '铁'; t2.designer = ''; t2.status = 'available';
-    t2.tableType = 'endcap'; t2.artworkType = 'none';
-    t2.grossWeight = '279'; t2.netWeight = '165'; t2.packSize = 'L1885*W1080*H1590mm'; t2.cost = '15000';
+    t2.tableType = 'endcap'; t2.artworkType = 'lightbox'; t2.spec = '英规';
+    t2.grossWeight = ''; t2.netWeight = ''; t2.packSize = ''; t2.cost = '';
     t2.note = '';
     t2.cover = 'images/duantou.jpg';
     t2.artwork = null; t2.drawing = null;
@@ -782,8 +836,11 @@ const app = {
       grid.innerHTML = `<div class="empty-state"><div class="glyph">🗂️</div><p>${items.length ? '没有匹配的展桌' : '还没有展桌记录'}</p><button class="button primary" onclick="app.openEditor()">＋ 新增展桌</button></div>`;
       return;
     }
-    const isSales = currentView === 'sales';
-    grid.innerHTML = list.map(it => isSales ? this.salesCard(it) : this.designCard(it)).join('');
+    if (currentView === 'sales') {
+      grid.innerHTML = list.map(it => this.salesCard(it)).join('');
+    } else {
+      grid.innerHTML = this.designTable(list);
+    }
   },
 
   salesCard(it) {
@@ -815,50 +872,74 @@ const app = {
       </article>`;
   },
 
-  designCard(it) {
-    const st = STATUS_META[it.status] || STATUS_META.designing;
-    const fmts = [];
-    if (it.artwork) fmts.push('AI');
-    if (it.drawing) fmts.push('PDF');
-    const typeLabel = TABLE_TYPE_META[it.tableType] || '中岛';
-    const artLabel = ARTWORK_TYPE_META[it.artworkType] || '无背板';
+  designTable(list) {
     return `
-      <article class="card" onclick="app.openEditor('${it.id}')">
-        <span class="status-pill" style="color:${st.color};background:${st.bg}">${st.label}</span>
-        <div class="card-body">
-          <span class="card-no">${it.partNo || '待填写料号'}</span>
-          <div class="tag-row">
-            <span class="chip fmt">${typeLabel}</span>
-            <span class="chip fmt">${artLabel}</span>
-          </div>
-          <h3>${it.name || '未命名展桌'}</h3>
-          ${it.model ? `<span class="model">${it.model}</span>` : ''}
-          <div class="info-rows">
-            <div class="info-row"><span class="k">尺寸</span><span class="v">${fmtSize(it)}</span></div>
-            <div class="info-row"><span class="k">数量</span><span class="v">${it.quantity} 张</span></div>
-            <div class="info-row"><span class="k">入库</span><span class="v">${it.stockDate || '待定'}</span></div>
-            ${it.material ? `<div class="info-row"><span class="k">材质</span><span class="v">${it.material}</span></div>` : ''}
-          </div>
-          ${fmts.length ? `<div class="tag-row">${fmts.map(f => `<span class="chip fmt">${f}</span>`).join('')}</div>` : ''}
-          <div class="file-row">
-            ${this.fileLink('画面文件', it.artwork, 'AI', 'artwork')}
-            ${this.fileLink('尺寸图纸', it.drawing, 'PDF', 'drawing')}
-          </div>
-          ${it.note ? `<div class="card-note">${it.note}</div>` : ''}
-        </div>
-        <div class="card-foot">
-          <span class="owner"><span class="avatar">${(it.designer || '设').charAt(0)}</span>${it.designer || '未分配'}</span>
-          <span>点击查看详情</span>
-        </div>
-      </article>`;
+      <div class="design-table-wrap">
+        <table class="design-table">
+          <thead>
+            <tr>
+              <th class="col-type">展桌类型</th>
+              <th class="col-art">画面类型</th>
+              <th class="col-size">展桌尺寸</th>
+              <th class="col-spec">规格</th>
+              <th class="col-op">操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.map(it => this.designRow(it)).join('')}
+          </tbody>
+        </table>
+      </div>`;
   },
 
-  fileLink(label, file, ext, kind) {
-    if (file) {
-      const durl = file.dataUrl || '#';
-      return `<a class="file-link" href="${durl}" download="${file.name}" onclick="event.stopPropagation()"><span class="fext">${ext}</span><span class="fname">${label} · ${file.name}</span></a>`;
-    }
-    return `<span class="file-link missing" onclick="event.stopPropagation()"><span class="fext">${ext}</span><span class="fname">${label} · 未上传</span></span>`;
+  designRow(it) {
+    const typeLabel = TABLE_TYPE_META[it.tableType] || '中岛';
+    const artLabel = ARTWORK_TYPE_META[it.artworkType] || '无背板';
+    const size = `L${it.length || '—'}*W${it.width || '—'}*H${it.height || '—'}mm`;
+    return `
+      <tr class="data-row" onclick="app.toggleDetail('${it.id}')">
+        <td class="col-type">${typeLabel}</td>
+        <td class="col-art">${artLabel}</td>
+        <td class="col-size">${size}</td>
+        <td class="col-spec">${it.spec || '—'}</td>
+        <td class="col-op"><span class="detail-link">详细信息</span></td>
+      </tr>
+      <tr class="detail-row" id="detail-${it.id}" style="display:none">
+        <td colspan="5">${this.detailPanel(it)}</td>
+      </tr>`;
+  },
+
+  detailPanel(it) {
+    const st = STATUS_META[it.status] || STATUS_META.designing;
+    const costText = it.cost ? '¥' + Number(it.cost).toLocaleString('zh-CN') : '—';
+    const files = [];
+    if (it.artwork) files.push(`<a class="file-link" href="${it.artwork.dataUrl || '#'}" download="${it.artwork.name}" onclick="event.stopPropagation()"><span class="fext">AI</span><span class="fname">画面文件 · ${it.artwork.name}</span></a>`);
+    if (it.drawing) files.push(`<a class="file-link" href="${it.drawing.dataUrl || '#'}" download="${it.drawing.name}" onclick="event.stopPropagation()"><span class="fext">PDF</span><span class="fname">尺寸图纸 · ${it.drawing.name}</span></a>`);
+    return `
+      <div class="detail-panel">
+        <div class="detail-item"><span class="k">展桌料号</span><span class="v">${it.partNo || '—'}</span></div>
+        <div class="detail-item"><span class="k">展桌名称</span><span class="v">${it.name || '—'}</span></div>
+        <div class="detail-item"><span class="k">型号</span><span class="v">${it.model || '—'}</span></div>
+        <div class="detail-item"><span class="k">材质</span><span class="v">${it.material || '—'}</span></div>
+        <div class="detail-item"><span class="k">毛重</span><span class="v">${it.grossWeight ? it.grossWeight + ' kg' : '—'}</span></div>
+        <div class="detail-item"><span class="k">净重</span><span class="v">${it.netWeight ? it.netWeight + ' kg' : '—'}</span></div>
+        <div class="detail-item"><span class="k">包装尺寸</span><span class="v">${it.packSize || '—'}</span></div>
+        <div class="detail-item"><span class="k">成本</span><span class="v">${costText}</span></div>
+        <div class="detail-item"><span class="k">数量</span><span class="v">${it.quantity} 张</span></div>
+        <div class="detail-item"><span class="k">交期</span><span class="v">${it.stockDate || '—'}</span></div>
+        <div class="detail-item"><span class="k">设计负责人</span><span class="v">${it.designer || '—'}</span></div>
+        <div class="detail-item"><span class="k">状态</span><span class="v">${st.label}</span></div>
+        ${files.length ? `<div class="detail-item" style="grid-column:1/-1"><span class="k">制作文件</span><div class="file-row" style="margin-top:4px">${files.join('')}</div></div>` : ''}
+        ${it.note ? `<div class="detail-note">备注：${it.note}</div>` : ''}
+        <div class="detail-actions">
+          <button class="button ghost" onclick="event.stopPropagation(); app.openEditor('${it.id}')">编辑</button>
+        </div>
+      </div>`;
+  },
+
+  toggleDetail(id) {
+    const row = document.getElementById('detail-' + id);
+    if (row) row.style.display = (row.style.display === 'none') ? '' : 'none';
   },
 
   /* ===== Editor ===== */
@@ -875,6 +956,7 @@ const app = {
     document.getElementById('eStatus').value = it.status || 'designing';
     document.getElementById('eTableType').value = it.tableType || 'island';
     document.getElementById('eArtworkType').value = it.artworkType || 'none';
+    document.getElementById('eSpec').value = it.spec || '';
     document.getElementById('eLength').value = it.length || '';
     document.getElementById('eWidth').value = it.width || '';
     document.getElementById('eHeight').value = it.height || '';
@@ -914,6 +996,7 @@ const app = {
     it.status = document.getElementById('eStatus').value;
     it.tableType = document.getElementById('eTableType').value;
     it.artworkType = document.getElementById('eArtworkType').value;
+    it.spec = document.getElementById('eSpec').value.trim();
     it.length = document.getElementById('eLength').value;
     it.width = document.getElementById('eWidth').value;
     it.height = document.getElementById('eHeight').value;
