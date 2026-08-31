@@ -329,10 +329,15 @@ img { display: block; max-width: 100%; }
   vertical-align: top;
 }
 .design-table th.col-type, .design-table td.col-type { width: 14%; }
-.design-table th.col-art, .design-table td.col-art { width: 12%; }
-.design-table th.col-size, .design-table td.col-size { width: 34%; }
-.design-table th.col-spec, .design-table td.col-spec { width: 14%; }
-.design-table th.col-op, .design-table td.col-op { width: 16%; }
+.design-table th.col-art, .design-table td.col-art { width: 8%; }
+.design-table th.col-size, .design-table td.col-size { width: 16%; }
+.design-table th.col-spec, .design-table td.col-spec { width: 8%; }
+.design-table th.col-material, .design-table td.col-material { width: 9%; }
+.design-table th.col-gw, .design-table td.col-gw { width: 7%; }
+.design-table th.col-nw, .design-table td.col-nw { width: 7%; }
+.design-table th.col-pack, .design-table td.col-pack { width: 16%; }
+.design-table th.col-cost, .design-table td.col-cost { width: 8%; }
+.design-table th.col-op, .design-table td.col-op { width: 7%; }
 .design-table tbody tr.data-row { cursor: pointer; }
 .design-table tbody tr.data-row:hover td { background: #fafbfa; }
 .design-table tbody tr:last-child td { border-bottom: 0; }
@@ -344,25 +349,6 @@ img { display: block; max-width: 100%; }
   border: none; background: transparent; padding: 0; font-size: 13px;
 }
 .detail-link:hover { text-decoration: underline; }
-
-.detail-row > td { background: #fafbfa; padding: 0; }
-.detail-panel {
-  padding: 20px 22px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 14px;
-}
-.detail-item { display: flex; flex-direction: column; gap: 3px; }
-.detail-item .k { color: var(--muted); font-size: 11px; }
-.detail-item .v { font-weight: 600; font-size: 13px; }
-.detail-note {
-  grid-column: 1 / -1;
-  font-size: 12px; color: var(--muted);
-  background: #f4f5f2; padding: 10px 12px;
-  border-left: 3px solid var(--line);
-}
-.detail-actions { grid-column: 1 / -1; display: flex; gap: 10px; margin-top: 2px; }
-.detail-actions .button { min-height: 34px; padding: 0 14px; font-size: 12px; }
 
 /* Empty state */
 .empty-state {
@@ -887,6 +873,11 @@ const app = {
               <th class="col-art">画面类型</th>
               <th class="col-size">展桌尺寸</th>
               <th class="col-spec">规格</th>
+              <th class="col-material">材质</th>
+              <th class="col-gw">毛重</th>
+              <th class="col-nw">净重</th>
+              <th class="col-pack">包装尺寸</th>
+              <th class="col-cost">成本</th>
               <th class="col-op">操作</th>
             </tr>
           </thead>
@@ -898,53 +889,22 @@ const app = {
   },
 
   designRow(it) {
-    const typeLabel = TABLE_TYPE_META[it.tableType] || '中岛';
     const artLabel = ARTWORK_TYPE_META[it.artworkType] || '无背板';
     const size = `L${it.length || '—'}*W${it.width || '—'}*H${it.height || '—'}mm`;
+    const costText = it.cost ? '¥' + Number(it.cost).toLocaleString('zh-CN') : '—';
     return `
-      <tr class="data-row" onclick="app.toggleDetail('${it.id}')">
-        <td class="col-type">${typeLabel}</td>
+      <tr class="data-row" onclick="app.openEditor('${it.id}')">
+        <td class="col-type">${it.name || '未命名展桌'}</td>
         <td class="col-art">${artLabel}</td>
         <td class="col-size">${size}</td>
         <td class="col-spec">${it.spec || '—'}</td>
-        <td class="col-op"><span class="detail-link">详细信息</span></td>
-      </tr>
-      <tr class="detail-row" id="detail-${it.id}" style="display:none">
-        <td colspan="5">${this.detailPanel(it)}</td>
+        <td class="col-material">${it.material || '—'}</td>
+        <td class="col-gw">${it.grossWeight ? it.grossWeight + 'kg' : '—'}</td>
+        <td class="col-nw">${it.netWeight ? it.netWeight + 'kg' : '—'}</td>
+        <td class="col-pack">${it.packSize || '—'}</td>
+        <td class="col-cost">${costText}</td>
+        <td class="col-op"><span class="detail-link">编辑</span></td>
       </tr>`;
-  },
-
-  detailPanel(it) {
-    const st = STATUS_META[it.status] || STATUS_META.designing;
-    const costText = it.cost ? '¥' + Number(it.cost).toLocaleString('zh-CN') : '—';
-    const files = [];
-    if (it.artwork) files.push(`<a class="file-link" href="${it.artwork.dataUrl || '#'}" download="${it.artwork.name}" onclick="event.stopPropagation()"><span class="fext">AI</span><span class="fname">画面文件 · ${it.artwork.name}</span></a>`);
-    if (it.drawing) files.push(`<a class="file-link" href="${it.drawing.dataUrl || '#'}" download="${it.drawing.name}" onclick="event.stopPropagation()"><span class="fext">PDF</span><span class="fname">尺寸图纸 · ${it.drawing.name}</span></a>`);
-    return `
-      <div class="detail-panel">
-        <div class="detail-item"><span class="k">展桌料号</span><span class="v">${it.partNo || '—'}</span></div>
-        <div class="detail-item"><span class="k">展桌名称</span><span class="v">${it.name || '—'}</span></div>
-        <div class="detail-item"><span class="k">型号</span><span class="v">${it.model || '—'}</span></div>
-        <div class="detail-item"><span class="k">材质</span><span class="v">${it.material || '—'}</span></div>
-        <div class="detail-item"><span class="k">毛重</span><span class="v">${it.grossWeight ? it.grossWeight + ' kg' : '—'}</span></div>
-        <div class="detail-item"><span class="k">净重</span><span class="v">${it.netWeight ? it.netWeight + ' kg' : '—'}</span></div>
-        <div class="detail-item"><span class="k">包装尺寸</span><span class="v">${it.packSize || '—'}</span></div>
-        <div class="detail-item"><span class="k">成本</span><span class="v">${costText}</span></div>
-        <div class="detail-item"><span class="k">数量</span><span class="v">${it.quantity} 张</span></div>
-        <div class="detail-item"><span class="k">交期</span><span class="v">${it.stockDate || '—'}</span></div>
-        <div class="detail-item"><span class="k">设计负责人</span><span class="v">${it.designer || '—'}</span></div>
-        <div class="detail-item"><span class="k">状态</span><span class="v">${st.label}</span></div>
-        ${files.length ? `<div class="detail-item" style="grid-column:1/-1"><span class="k">制作文件</span><div class="file-row" style="margin-top:4px">${files.join('')}</div></div>` : ''}
-        ${it.note ? `<div class="detail-note">备注：${it.note}</div>` : ''}
-        <div class="detail-actions">
-          <button class="button ghost" onclick="event.stopPropagation(); app.openEditor('${it.id}')">编辑</button>
-        </div>
-      </div>`;
-  },
-
-  toggleDetail(id) {
-    const row = document.getElementById('detail-' + id);
-    if (row) row.style.display = (row.style.display === 'none') ? '' : 'none';
   },
 
   /* ===== Editor ===== */
