@@ -264,6 +264,48 @@ img { display: block; max-width: 100%; }
   background: var(--green); color: var(--lime); font-size: 11px; font-weight: 700;
 }
 
+/* ===== Sales spec card (参考图风格) ===== */
+.card.spec { border-radius: 0; box-shadow: none; }
+.card.spec:hover { box-shadow: 0 12px 30px rgba(22,38,29,.1); }
+.spec-head {
+  padding: 16px 18px 12px;
+  display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+}
+.spec-title {
+  font-size: 18px; font-weight: 800; letter-spacing: -.01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.spec-type { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+.spec-divider { height: 2px; background: #d8f35c; }
+.spec-cover {
+  height: 190px; background: #edf0ee;
+  display: grid; place-items: center; overflow: hidden; position: relative;
+}
+.spec-cover img { width: 100%; height: 100%; object-fit: cover; }
+.spec-cover .cover-fallback {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: #7d9a86; font-size: 13px; font-weight: 700; letter-spacing: .06em;
+}
+.spec-cover .cover-fallback .glyph { font-size: 40px; line-height: 1; opacity: .6; }
+.spec-table { padding: 10px 18px 2px; }
+.spec-row {
+  display: flex; align-items: baseline; gap: 10px;
+  padding: 5px 0; border-bottom: 1px solid #f0f2ef; font-size: 13px;
+}
+.spec-row:last-child { border-bottom: 0; }
+.spec-row .k { color: var(--muted); font-size: 11px; min-width: 58px; flex-shrink: 0; }
+.spec-row .v { font-weight: 600; }
+.spec-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 18px 0; }
+.spec-foot {
+  margin-top: auto; padding: 12px 18px;
+  border-top: 1px solid #ecefea;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.spec-foot .price { color: var(--orange); font-size: 18px; font-weight: 800; }
+.spec-foot .status {
+  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 12px;
+}
+
 /* Empty state */
 .empty-state {
   grid-column: 1 / -1;
@@ -494,6 +536,9 @@ img { display: block; max-width: 100%; }
         <div class="form-grid" style="margin-top:14px">
           <label class="field"><span>数量</span><input id="eQuantity" type="number" min="1" value="1"></label>
           <label class="field"><span>交期 / 入库时间</span><input id="eStockDate" type="date"></label>
+          <label class="field"><span>毛重 (kg)</span><input id="eGrossWeight" placeholder="例如 58"></label>
+          <label class="field"><span>净重 (kg)</span><input id="eNetWeight" placeholder="例如 52"></label>
+          <label class="field full"><span>包装尺寸 (mm)</span><input id="ePackSize" placeholder="例如 L1850*W850*H800mm"></label>
         </div>
       </div>
 
@@ -501,7 +546,8 @@ img { display: block; max-width: 100%; }
         <p class="sec-title">销售信息</p>
         <div class="form-grid">
           <label class="field"><span>价格（元）</span><input id="ePrice" type="number" min="0" placeholder="留空表示面议"></label>
-          <label class="field"><span>卖点标签</span><input id="eHighlights" placeholder="逗号分隔，如：内置喇叭, 视频屏"><span class="hint">用逗号「,」分隔多个卖点</span></label>
+          <label class="field"><span>成本（元）</span><input id="eCost" type="number" min="0" placeholder="例如 24000"></label>
+          <label class="field full"><span>卖点标签</span><input id="eHighlights" placeholder="逗号分隔，如：内置喇叭, 视频屏"><span class="hint">用逗号「,」分隔多个卖点</span></label>
           <label class="field full"><span>外观图</span>
             <div class="upload-box">
               <div class="f-info"><div class="f-name" id="eCoverName">未上传</div><div class="f-hint">JPG / PNG，建议横向 3:2</div></div>
@@ -593,6 +639,7 @@ function emptyTable() {
     length: '', width: '', height: '', price: '', highlights: [],
     tableType: 'island', artworkType: 'none',
     material: '', designer: '', status: 'designing',
+    grossWeight: '', netWeight: '', packSize: '', cost: '',
     cover: null, artwork: null, drawing: null, note: ''
   };
 }
@@ -626,6 +673,10 @@ const app = {
         items.forEach(i => {
           if (!i.tableType) i.tableType = 'island';
           if (!i.artworkType) i.artworkType = 'none';
+          if (!i.grossWeight) i.grossWeight = '';
+          if (!i.netWeight) i.netWeight = '';
+          if (!i.packSize) i.packSize = '';
+          if (!i.cost) i.cost = '';
         });
       }
     } catch(e) { items = []; }
@@ -648,6 +699,7 @@ const app = {
     t1.price = ''; t1.highlights = ['内置发声喇叭', '视频展示屏', '首次制作'];
     t1.material = '实木贴皮 + 亚克力灯箱'; t1.designer = '方镱静'; t1.status = 'producing';
     t1.tableType = 'island'; t1.artworkType = 'video';
+    t1.grossWeight = '58'; t1.netWeight = '52'; t1.packSize = 'L1850*W850*H800mm'; t1.cost = '24000';
     t1.note = '桌角做圆角处理；发声喇叭需预留走线孔位。';
     t1.artwork = null; t1.drawing = null;
 
@@ -658,6 +710,7 @@ const app = {
     t2.price = '26800'; t2.highlights = ['可折叠便携', 'LED 背光'];
     t2.material = '铝合金框架 + 玻璃面板'; t2.designer = '方镱静'; t2.status = 'available';
     t2.tableType = 'endcap'; t2.artworkType = 'lightbox';
+    t2.grossWeight = '45'; t2.netWeight = '40'; t2.packSize = 'L1550*W750*H950mm'; t2.cost = '18000';
     t2.note = '需配航空运输箱。';
 
     const t3 = emptyTable();
@@ -667,6 +720,7 @@ const app = {
     t3.price = '19800'; t3.highlights = ['简约白色', '隐藏线槽'];
     t3.material = '烤漆中纤板'; t3.designer = '方镱静'; t3.status = 'designing';
     t3.tableType = 'island'; t3.artworkType = 'none';
+    t3.grossWeight = '35'; t3.netWeight = '30'; t3.packSize = 'L1250*W650*H1100mm'; t3.cost = '12000';
     t3.note = '';
 
     items = [t1, t2, t3];
@@ -750,27 +804,35 @@ const app = {
 
   salesCard(it) {
     const st = STATUS_META[it.status] || STATUS_META.designing;
+    const typeLabel = TABLE_TYPE_META[it.tableType] || '中岛';
+    const artLabel = ARTWORK_TYPE_META[it.artworkType] || '无背板';
     const cover = it.cover
       ? `<img src="${it.cover}" alt="">`
       : `<div class="cover-fallback"><span class="glyph">🖼️</span><span>暂无外观图</span></div>`;
     const hl = (it.highlights || []).filter(Boolean);
+    const sizeSpec = `L${it.length || '—'}*W${it.width || '—'}*H${it.height || '—'}mm`;
+    const costText = it.cost ? '¥' + Number(it.cost).toLocaleString('zh-CN') : '—';
     return `
-      <article class="card" onclick="app.openEditor('${it.id}')">
-        <div class="card-cover">${cover}</div>
-        <span class="status-pill" style="color:${st.color};background:${st.bg}">${st.label}</span>
-        <div class="card-body">
-          <span class="card-no">${it.partNo || '待填写料号'}</span>
-          <h3>${it.name || '未命名展桌'}</h3>
-          ${it.model ? `<span class="model">${it.model}</span>` : ''}
-          <div class="info-rows">
-            <div class="info-row"><span class="k">尺寸</span><span class="v">${fmtSize(it)}</span></div>
-            <div class="info-row"><span class="k">数量</span><span class="v">${it.quantity} 张</span></div>
-            <div class="info-row"><span class="k">交期</span><span class="v">${it.stockDate || '待定'}</span></div>
-            <div class="info-row"><span class="k">价格</span><span class="v price">${fmtPrice(it.price)}</span></div>
-          </div>
-          ${hl.length ? `<div class="tag-row">${hl.map(h => `<span class="chip hl">${h}</span>`).join('')}</div>` : ''}
+      <article class="card spec" onclick="app.openEditor('${it.id}')">
+        <div class="spec-head">
+          <span class="spec-title">${it.name || '未命名展桌'}</span>
+          <span class="spec-type">${typeLabel} · ${artLabel}</span>
         </div>
-        <div class="card-foot"><span>${it.designer ? '设计 · ' + it.designer : ''}</span><span>点击查看详情</span></div>
+        <div class="spec-divider"></div>
+        <div class="spec-cover">${cover}</div>
+        <div class="spec-table">
+          <div class="spec-row"><span class="k">尺寸</span><span class="v">${sizeSpec}</span></div>
+          <div class="spec-row"><span class="k">材质</span><span class="v">${it.material || '—'}</span></div>
+          <div class="spec-row"><span class="k">毛重</span><span class="v">${it.grossWeight ? it.grossWeight + ' kg' : '—'}</span></div>
+          <div class="spec-row"><span class="k">净重</span><span class="v">${it.netWeight ? it.netWeight + ' kg' : '—'}</span></div>
+          <div class="spec-row"><span class="k">包装尺寸</span><span class="v">${it.packSize || '—'}</span></div>
+          <div class="spec-row"><span class="k">成本</span><span class="v">${costText}</span></div>
+        </div>
+        ${hl.length ? `<div class="spec-tags">${hl.map(h => `<span class="chip hl">${h}</span>`).join('')}</div>` : ''}
+        <div class="spec-foot">
+          <span class="price">${fmtPrice(it.price)}</span>
+          <span class="status" style="color:${st.color};background:${st.bg}">${st.label}</span>
+        </div>
       </article>`;
   },
 
@@ -839,7 +901,11 @@ const app = {
     document.getElementById('eHeight').value = it.height || '';
     document.getElementById('eQuantity').value = it.quantity || 1;
     document.getElementById('eStockDate').value = it.stockDate || '';
+    document.getElementById('eGrossWeight').value = it.grossWeight || '';
+    document.getElementById('eNetWeight').value = it.netWeight || '';
+    document.getElementById('ePackSize').value = it.packSize || '';
     document.getElementById('ePrice').value = it.price ?? '';
+    document.getElementById('eCost').value = it.cost ?? '';
     document.getElementById('eHighlights').value = (it.highlights || []).join(', ');
     document.getElementById('eMaterial').value = it.material || '';
     document.getElementById('eDesigner').value = it.designer || '';
@@ -874,7 +940,11 @@ const app = {
     it.height = document.getElementById('eHeight').value;
     it.quantity = parseInt(document.getElementById('eQuantity').value) || 1;
     it.stockDate = document.getElementById('eStockDate').value;
+    it.grossWeight = document.getElementById('eGrossWeight').value.trim();
+    it.netWeight = document.getElementById('eNetWeight').value.trim();
+    it.packSize = document.getElementById('ePackSize').value.trim();
     it.price = document.getElementById('ePrice').value;
+    it.cost = document.getElementById('eCost').value;
     it.highlights = document.getElementById('eHighlights').value.split(/[,，]/).map(s => s.trim()).filter(Boolean);
     it.material = document.getElementById('eMaterial').value.trim();
     it.designer = document.getElementById('eDesigner').value.trim();
