@@ -400,7 +400,6 @@ img { display: block; max-width: 100%; }
       <div class="view-head">
         <div>
           <p class="eyebrow" id="viewEyebrow">SALES VIEW · 客户视角</p>
-          <h2 id="viewHeading">面向销售的展桌信息</h2>
           <p id="viewDesc">价格、外观、交期与卖点，快速向客户介绍每一张展桌。</p>
         </div>
         <div class="view-stats">
@@ -624,7 +623,6 @@ const app = {
     document.getElementById('viewTitle').textContent = isSales ? '销售端' : '设计端';
     document.getElementById('viewTag').textContent = isSales ? 'SALES' : 'DESIGN';
     document.getElementById('viewEyebrow').textContent = isSales ? 'SALES VIEW · 客户视角' : 'DESIGN VIEW · 制作视角';
-    document.getElementById('viewHeading').textContent = isSales ? '面向销售的展桌信息' : '面向设计的展桌信息';
     document.getElementById('viewDesc').textContent = isSales
       ? '价格、外观、交期与卖点，快速向客户介绍每一张展桌。'
       : '料号、尺寸、文件与工艺，聚焦制作与交付细节。';
