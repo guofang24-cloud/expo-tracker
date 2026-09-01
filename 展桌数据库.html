@@ -336,21 +336,23 @@ img { display: block; max-width: 100%; }
   vertical-align: middle;
   word-break: break-word;
 }
-.design-table th.col-no, .design-table td.col-no { width: 6%; }
-.design-table th.col-type, .design-table td.col-type { width: 13%; }
-.design-table th.col-art, .design-table td.col-art { width: 7%; }
-.design-table th.col-size, .design-table td.col-size { width: 16%; }
-.design-table th.col-spec, .design-table td.col-spec { width: 7%; }
-.design-table th.col-material, .design-table td.col-material { width: 8%; }
-.design-table th.col-gw, .design-table td.col-gw { width: 6%; }
-.design-table th.col-nw, .design-table td.col-nw { width: 6%; }
-.design-table th.col-pack, .design-table td.col-pack { width: 16%; }
-.design-table th.col-cost, .design-table td.col-cost { width: 7%; }
-.design-table th.col-op, .design-table td.col-op { width: 8%; }
+.design-table th.col-no, .design-table td.col-no { width: 5%; }
+.design-table th.col-type, .design-table td.col-type { width: 9%; }
+.design-table th.col-art, .design-table td.col-art { width: 5%; }
+.design-table th.col-size, .design-table td.col-size { width: 12%; }
+.design-table th.col-spec, .design-table td.col-spec { width: 5%; }
+.design-table th.col-material, .design-table td.col-material { width: 6%; }
+.design-table th.col-gw, .design-table td.col-gw { width: 5%; }
+.design-table th.col-nw, .design-table td.col-nw { width: 5%; }
+.design-table th.col-pack, .design-table td.col-pack { width: 12%; }
+.design-table th.col-cost, .design-table td.col-cost { width: 6%; }
+.design-table th.col-note, .design-table td.col-note { width: 24%; }
+.design-table th.col-op, .design-table td.col-op { width: 6%; }
 .design-table tbody tr:nth-child(even) td { background: #f8fbfa; }
 .design-table tbody tr.data-row { cursor: pointer; }
 .design-table tbody tr.data-row:hover td { background: #eef7fb; }
 .design-table td.col-cost { color: #eb4025; font-weight: 700; }
+.design-table td.col-note { color: var(--muted); font-size: 13px; }
 .detail-link {
   color: #2a7de1;
   font-weight: 700;
@@ -650,7 +652,7 @@ img { display: block; max-width: 100%; }
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'expo_table_db_v4';
+const STORAGE_KEY = 'expo_table_db_v5';
 const MAX_FILE_SIZE = 8 * 1024 * 1024;
 
 const STATUS_META = {
@@ -746,7 +748,7 @@ const app = {
     t1.material = '铁'; t1.designer = ''; t1.status = 'available';
     t1.tableType = 'island'; t1.artworkType = 'lightbox'; t1.spec = '韩规';
     t1.grossWeight = '279'; t1.netWeight = '165'; t1.packSize = 'L1885*W1080*H1590mm'; t1.cost = '15000';
-    t1.note = '';
+    t1.note = '桌角做圆角处理；画面安装前核对实际尺寸。';
     t1.cover = 'images/zhongdao.jpg';
     t1.artwork = null; t1.drawing = null;
 
@@ -893,6 +895,7 @@ const app = {
               <th class="col-nw">净重</th>
               <th class="col-pack">包装尺寸</th>
               <th class="col-cost">成本</th>
+              <th class="col-note">备注</th>
               <th class="col-op">操作</th>
             </tr>
           </thead>
@@ -919,6 +922,7 @@ const app = {
         <td class="col-nw">${it.netWeight ? it.netWeight + 'kg' : '—'}</td>
         <td class="col-pack">${it.packSize || '—'}</td>
         <td class="col-cost">${costText}</td>
+        <td class="col-note">${it.note || ''}</td>
         <td class="col-op"><span class="detail-link">编辑</span></td>
       </tr>`;
   },
