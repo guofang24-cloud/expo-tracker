@@ -136,6 +136,9 @@ img { display: block; max-width: 100%; }
 
 /* ===== Content ===== */
 .content { padding: 16px 20px; width: 100%; }
+.content.design-mode { padding: 0; }
+.content.design-mode .view-head { padding: 18px 20px 0; margin-bottom: 14px; }
+.content.design-mode .filter-bar { margin: 0 20px 14px; }
 .view-head {
   display: flex; align-items: flex-end; justify-content: space-between;
   gap: 24px; margin-bottom: 24px; flex-wrap: wrap;
@@ -300,7 +303,7 @@ img { display: block; max-width: 100%; }
 /* ===== Design table view ===== */
 .design-table-wrap {
   background: #fff;
-  margin: 0 -20px;
+  margin: 0;
   border: none;
   border-top: 1px solid #dbe4de;
   border-bottom: 1px solid #dbe4de;
@@ -803,6 +806,10 @@ const app = {
 
     // filter bar only on design view
     document.getElementById('filterBar').style.display = isSales ? 'none' : 'flex';
+
+    // design mode: full-bleed layout for the table
+    const contentEl = document.querySelector('.content');
+    if (contentEl) contentEl.classList.toggle('design-mode', !isSales);
 
     document.getElementById('navCountSales').textContent = items.length;
     document.getElementById('navCountDesign').textContent = items.length;
