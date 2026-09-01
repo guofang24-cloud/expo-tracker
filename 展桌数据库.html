@@ -135,7 +135,7 @@ img { display: block; max-width: 100%; }
 .search input { border: 0; outline: 0; background: transparent; width: 190px; font-size: 13px; }
 
 /* ===== Content ===== */
-.content { padding: 32px; width: 100%; }
+.content { padding: 16px 20px; width: 100%; }
 .view-head {
   display: flex; align-items: flex-end; justify-content: space-between;
   gap: 24px; margin-bottom: 24px; flex-wrap: wrap;
@@ -297,52 +297,56 @@ img { display: block; max-width: 100%; }
 .spec-row .v { font-weight: 600; }
 .spec-tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 18px 0; }
 
-/* ===== Design table view (参考定制缩略表) ===== */
+/* ===== Design table view ===== */
 .design-table-wrap {
   background: #fff;
-  border: 1px solid #e6e9e6;
-  border-radius: 12px;
+  border: 1px solid #e2e8e4;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 1px 3px rgba(22,38,29,.04);
 }
 .design-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  table-layout: fixed;
 }
 .design-table th {
-  background: #fafbfa;
-  font-weight: 600;
+  background: #e6f7ff;
+  font-weight: 700;
   text-align: left;
-  padding: 15px 20px;
-  border-bottom: 1px solid #e6e9e6;
-  color: var(--muted);
-  font-size: 12px;
-  letter-spacing: .02em;
+  padding: 14px 16px;
+  border-bottom: 1px solid #c9e6f6;
+  color: #1a3a5c;
+  font-size: 13px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .design-table td {
-  padding: 15px 20px;
-  border-bottom: 1px solid #f0f2f0;
+  padding: 13px 16px;
+  border-bottom: 1px solid #eef2ef;
   color: var(--ink);
   background: #fff;
-  vertical-align: top;
+  vertical-align: middle;
+  word-break: break-word;
 }
-.design-table th.col-type, .design-table td.col-type { width: 14%; }
-.design-table th.col-art, .design-table td.col-art { width: 8%; }
+.design-table th.col-no, .design-table td.col-no { width: 6%; }
+.design-table th.col-type, .design-table td.col-type { width: 13%; }
+.design-table th.col-art, .design-table td.col-art { width: 7%; }
 .design-table th.col-size, .design-table td.col-size { width: 16%; }
-.design-table th.col-spec, .design-table td.col-spec { width: 8%; }
-.design-table th.col-material, .design-table td.col-material { width: 9%; }
-.design-table th.col-gw, .design-table td.col-gw { width: 7%; }
-.design-table th.col-nw, .design-table td.col-nw { width: 7%; }
+.design-table th.col-spec, .design-table td.col-spec { width: 7%; }
+.design-table th.col-material, .design-table td.col-material { width: 8%; }
+.design-table th.col-gw, .design-table td.col-gw { width: 6%; }
+.design-table th.col-nw, .design-table td.col-nw { width: 6%; }
 .design-table th.col-pack, .design-table td.col-pack { width: 16%; }
-.design-table th.col-cost, .design-table td.col-cost { width: 8%; }
-.design-table th.col-op, .design-table td.col-op { width: 7%; }
+.design-table th.col-cost, .design-table td.col-cost { width: 7%; }
+.design-table th.col-op, .design-table td.col-op { width: 8%; }
+.design-table tbody tr:nth-child(even) td { background: #f8fbfa; }
 .design-table tbody tr.data-row { cursor: pointer; }
-.design-table tbody tr.data-row:hover td { background: #fafbfa; }
-.design-table tbody tr:last-child td { border-bottom: 0; }
+.design-table tbody tr.data-row:hover td { background: #eef7fb; }
+.design-table td.col-cost { color: #eb4025; font-weight: 700; }
 .detail-link {
-  color: #699629;
+  color: #2a7de1;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -869,6 +873,7 @@ const app = {
         <table class="design-table">
           <thead>
             <tr>
+              <th class="col-no">料号</th>
               <th class="col-type">展桌类型</th>
               <th class="col-art">画面类型</th>
               <th class="col-size">展桌尺寸</th>
@@ -894,6 +899,7 @@ const app = {
     const costText = it.cost ? '¥' + Number(it.cost).toLocaleString('zh-CN') : '—';
     return `
       <tr class="data-row" onclick="app.openEditor('${it.id}')">
+        <td class="col-no">${it.partNo || '—'}</td>
         <td class="col-type">${it.name || '未命名展桌'}</td>
         <td class="col-art">${artLabel}</td>
         <td class="col-size">${size}</td>
